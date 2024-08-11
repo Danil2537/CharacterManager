@@ -3,7 +3,7 @@
 	<info>
 		<name>Treasure</name>
 		<update version="0.0.2">
-			<file name="items-treasure.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Items/items-treasure.xml" />
+			<file name="items-treasure.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Items/items-treasure.xml" />
 		</update>
 	</info>
 	

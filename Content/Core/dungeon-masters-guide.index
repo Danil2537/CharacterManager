@@ -9,22 +9,22 @@
 		</update>
 	</info>
 	<files>
-		<file name="source.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/source.xml" />
-		<file name="cleric-deathdomain.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Classescleric-deathdomain.xml" />
-		<file name="class-oathbreaker.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Classesclass-oathbreaker.xml" />		
-		<file name="subrace-eladrin.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Racessubrace-eladrin.xml" />		
-		<file name="items-armor.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Items/items-armor.xml" />
-		<file name="items-weapons.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Items/items-weapons.xml" />
-		<file name="items-firearms.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Items/items-firearms.xml" />
-		<file name="items-potions.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Items/items-potions.xml" />
-		<file name="items-poison.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Items/items-poison.xml" />
-		<file name="items-rings.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Items/items-rings.xml" />
-		<file name="items-rods.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Items/items-rods.xml" />
-		<file name="items-staffs.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Items/items-staffs.xml" />
-		<file name="items-wands.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Items/items-wands.xml" />
-		<file name="items-wondrous.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Items/items-wondrous.xml" />
-		<file name="items-vehicles.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Items/items-vehicles.xml" />
-		<file name="items-gifts.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Items/items-gifts.xml" />
-		<file name="items-treasure.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Items/items-treasure.xml" />
+		<file name="source.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/source.xml" />
+		<file name="cleric-deathdomain.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Classescleric-deathdomain.xml" />
+		<file name="class-oathbreaker.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Classesclass-oathbreaker.xml" />		
+		<file name="subrace-eladrin.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Racessubrace-eladrin.xml" />		
+		<file name="items-armor.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Items/items-armor.xml" />
+		<file name="items-weapons.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Items/items-weapons.xml" />
+		<file name="items-firearms.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Items/items-firearms.xml" />
+		<file name="items-potions.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Items/items-potions.xml" />
+		<file name="items-poison.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Items/items-poison.xml" />
+		<file name="items-rings.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Items/items-rings.xml" />
+		<file name="items-rods.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Items/items-rods.xml" />
+		<file name="items-staffs.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Items/items-staffs.xml" />
+		<file name="items-wands.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Items/items-wands.xml" />
+		<file name="items-wondrous.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Items/items-wondrous.xml" />
+		<file name="items-vehicles.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Items/items-vehicles.xml" />
+		<file name="items-gifts.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Items/items-gifts.xml" />
+		<file name="items-treasure.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/Items/items-treasure.xml" />
 	</files>
 </index>
