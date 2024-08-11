@@ -9,7 +9,7 @@
 		</update>
 	</info>
 	<files>
-		<file name="source.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/dungeon-masters-guide/source.xml" />
+		<file name="source.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/source.xml" />
 		<file name="cleric-deathdomain.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Classescleric-deathdomain.xml" />
 		<file name="class-oathbreaker.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Classesclass-oathbreaker.xml" />		
 		<file name="subrace-eladrin.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Racessubrace-eladrin.xml" />		
