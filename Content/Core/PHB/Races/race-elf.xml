@@ -3,7 +3,7 @@
 	<info>
 		<name>Elf</name>
 		<update version="0.2">
-			<file name="race-elf.xml" url="https://raw.githubusercontent.com/aurorabuilder/elements/master/core/players-handbook/races/race-elf.xml" />
+			<file name="race-elf.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/PHB/Races/race-elf.xml" />
 		</update>
 	</info>
 
