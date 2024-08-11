@@ -2,7 +2,7 @@
 <elements>
 	<info>
 		<update version="0.0.2">
-			<file name="sources.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/source.xml" />
+			<file name="source.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/source.xml" />
 		</update>
 	</info>
 	<element name="Dungeon Master’s Guide" type="Source" source="Core" id="ID_WOTC_SOURCE_DUNGEON_MASTERS_GUIDE">
