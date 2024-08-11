@@ -3,7 +3,7 @@
 	<info>
 		<name>Firearms</name>
 		<update version="0.0.2">
-			<file name="items-firearms.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Itemsitems-firearms.xml" />
+			<file name="items-firearms.xml" url="https://raw.githubusercontent.com/Danil2537/CharacterManager/main/Content/Core/DMG/Items/items-firearms.xml" />
 		</update>
 	</info>
 
