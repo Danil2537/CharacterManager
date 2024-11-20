@@ -1,6 +1,7 @@
 ﻿using CharacterManager.Commands;
 using CharacterManager.DbContexts;
 using CharacterManager.Models;
+using CharacterManager.Queries;
 using CharacterManager.Stores;
 using System;
 using System.Collections.Generic;
@@ -32,6 +33,7 @@ namespace CharacterManager.ViewModels
         private Background _chosenBackground;
         private Character _createdCharacter;
         public bool CanCreateCharacter;
+       
         public ObservableCollection<Class> AvailableClasses { get; set; }
         public ObservableCollection<Species> AvailableSpecies { get; set; }
         public CommandBase ChooseClassCommand { get; }
@@ -227,77 +229,50 @@ namespace CharacterManager.ViewModels
         public ICommand MoveToAvailableCommand { get; }
         public ICommand CreateCharacterCommand { get; }
         public ICommand CancelCommand { get; }
-        
+
+        public async Task InitializeAsync()
+        {
+            try
+            {
+                // Створення об'єкта для виконання запиту на отримання всіх класів
+                GetAllClassesQuery getAllClassesQuery = new GetAllClassesQuery(_contextFactory);
+
+                // Очікуємо завершення виконання запиту
+                await getAllClassesQuery.ExecuteAsync();
+
+                // Оновлюємо колекцію класів з отриманими даними
+                AvailableClasses = new ObservableCollection<Class>(getAllClassesQuery.Classes);
+
+                // Логування кількості завантажених класів
+                Console.WriteLine("Classes loaded: " + AvailableClasses.Count);
+            }
+            catch (Exception ex)
+            {
+                // Логування помилки, якщо вона виникла під час завантаження класів
+                Console.WriteLine("Error loading classes: " + ex.Message);
+            }
+        }
+
+        public static async Task<CreationVM> CreateAsync(Services.NavigationService navigationService, CharacterManagerDbContextFactory contextFactory, User user)
+        {
+            // Створення об'єкта CreationVM асинхронно
+            var viewModel = await CreationVM.CreateAsync(navigationService, contextFactory, user);
+
+            // Очікуємо завершення завантаження даних для ініціалізації
+            await viewModel.InitializeAsync();
+            return viewModel;
+        }
+
         public CreationVM(Services.NavigationService navigationService, CharacterManagerDbContextFactory contextFactory, User user)
         {
+            // Збереження переданого контексту бази даних
             _contextFactory = contextFactory;
-            Feat feat1 = new Feat("Rage", "You can enter a rage as a bonus action.", FeatTypes.bonus_action, 1);
-            Feat feat2 = new Feat("Unarmored Defense", "Your AC equals 10 + Dexterity modifier + Constitution modifier.", FeatTypes.other, 1);
 
+            // Ініціалізація колекцій до завантаження даних
+            AvailableClasses = new ObservableCollection<Class>();
+            AvailableSpecies = new ObservableCollection<Species>();
 
-            // Creating Subclass objects
-            Subclass berserker = new Subclass("Path of the Berserker", "Frenzied rage.", "A barbarian who channels rage into a powerful frenzy.",
-                Abilities.Strength, false, new List<Spell>(), false, new List<Spell>());
-            Subclass evocation = new Subclass("School of Evocation", "Master of destructive spells.", "A wizard who specializes in powerful evocation spells.",
-                Abilities.Intelligence, true, new List<Spell>(), true, new List<Spell>());
-
-            // Sample items
-            Item item1 = new Gear("Explorer's Pack", "A pack containing essential supplies.");
-            Item item2 = new Gear("Dungeoneer's Pack", "A pack with equipment for dungeon exploration.");
-            Item item3 = new Gear("Arcane Focus", "A focus used for casting spells.");
-
-            // Create starting items options for Barbarian and Wizard
-            ObservableCollection<List<Item>> barbarianStartingItems = new ObservableCollection<List<Item>>
-            {
-                new List<Item> { item1, item2 }, // Option 1
-                new List<Item> { item1 } // Option 2
-            };
-
-            ObservableCollection<List<Item>> wizardStartingItems = new ObservableCollection<List<Item>>
-            {
-                new List<Item> { item3 }, // Option 1
-                new List<Item> { item2, item3 } // Option 2
-            };
-
-            AvailableBackgroundItems = new ObservableCollection<Item>
-            {
-                new Weapon("Shortsword", "A little longer than a dagger steel sword",10,20,false, "weapon", "Piercing", 1,6,false, 5, "Melee Weapon"),
-                new Potion("Health Potion", "Restores 4d4 hit points", 2, 50, true, "potion", "Restores Health", 0),
-                new Armor("Shield", "A round buckler shield with a heraldic symbol of Tempus on it", 15, 20, false, "Armor", 2, "Shield", true)
-            };
-
-            SelectedBackgroundItems = new ObservableCollection<Item>();
-
-            // Creating Class objects with StartingItemsOptions
-            Class barbarian = new Class("Barbarian", "PHB", "A warrior who can channel their rage.",
-                Abilities.Strength, 12, 1, 3, "Choose a path at 3rd level.",
-                new List<int> { 4, 8, 12, 16, 19 }, false, 2, new List<Skills> { Skills.Athletics, Skills.Acrobatics },
-                new List<Feat> { feat1, feat2 }, new Dice(5,4,0), new HashSet<Abilities> { Abilities.Strength, Abilities.Constitution },
-                barbarianStartingItems);
-            barbarian.AddAvailableSubclass(berserker);
-
-            Class wizard = new Class("Wizard", "PHB", "A scholar of arcane magic.",
-                Abilities.Intelligence, 6, 1, 2, "Choose a school of magic at 2nd level.",
-                new List<int> { 4, 8, 12, 16, 19 }, true, 2, new List<Skills> { Skills.Arcana, Skills.History },
-                new List<Feat>(), new Dice(5, 4, 0), new HashSet<Abilities> { Abilities.Intelligence, Abilities.Wisdom },
-                wizardStartingItems);
-            wizard.AddAvailableSubclass(evocation);
-
-            // Creating Species objects
-            Species human = new Species("Human", "Versatile and ambitious.", "PHB", Sizes.medium, 30, 0, 0, 0, 1,
-                new List<string> { "Common" });
-            Species elf = new Species("Elf", "Graceful and magical.", "PHB", Sizes.medium, 30, 0, 0, 60, 2,
-                new List<string> { "Common", "Elvish" });
-
-            AvailableClasses = new ObservableCollection<Models.Class>
-            {
-                barbarian, wizard
-            };
-            AvailableSpecies = new ObservableCollection<Models.Species>
-            {
-                human, elf
-            };
-
+            // Ініціалізація команд для різних дій
             ChooseClassCommand = new ActionCommand(ChooseClass);
             ChooseSpeciesCommand = new ActionCommand(ChooseSpecies);
             RollAbilityCommand = new ActionCommand(RollAbility);
@@ -306,7 +281,11 @@ namespace CharacterManager.ViewModels
             MoveToAvailableCommand = new ActionCommand(MoveToAvailable);
             CreateCharacterCommand = new CreateCharacterCommand(this, user, navigationService);
             CancelCommand = new NavigateCommand(navigationService);
+
+            // Ініціалізація асинхронних даних
+            InitializeAsync();
         }
+
 
         public CreationVM(ObservableCollection<Species> availableSpecies, ObservableCollection<Class> availableClasses)
         {

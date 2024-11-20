@@ -7,7 +7,7 @@
              xmlns:global="clr-namespace:CharacterManager"
              xmlns:models="clr-namespace:CharacterManager.Models" 
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             HorizontalAlignment="Stretch" VerticalAlignment="Stretch"   >
     <UserControl.Resources >
         <!-- ObjectDataProvider to get the enum values -->
         <ObjectDataProvider x:Key="SkillsEnumValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
@@ -26,120 +26,162 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
         <BooleanToVisibilityConverter x:Key="convVisibility"/>
-    </UserControl.Resources>
 
-    <Grid>
-        <TabControl>
-            <!--<TabItem Header="Sources">
+
+        <!-- Стиль для Label -->
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Papyrus"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="0 15"/>
+        </Style>
+
+        <!-- Стиль для TextBox -->
+        <Style TargetType="TextBox">
+            <Setter Property="FontFamily" Value="Papyrus"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="DimGray"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="Width" Value="300"/>
+        </Style>
+
+        <!-- Стиль для Button -->
+        <Style TargetType="Button">
+            <Setter Property="FontFamily" Value="Papyrus"/>
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="#4E4A47"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="Width" Value="110"/>
+            <Setter Property="BorderBrush" Value="Goldenrod"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Margin" Value="0 15"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="Goldenrod"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+
+
+            </Style.Triggers>
+        </Style>
+        <!-- Стили для RadioButton -->
+        <Style TargetType="RadioButton">
+            <Setter Property="FontFamily" Value="Papyrus"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="0 10"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Foreground" Value="Goldenrod"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Стили для StackPanel -->
+        <Style TargetType="StackPanel">
+            <Setter Property="Background" Value="#2D2B1F"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Orientation" Value="Vertical"/>
+        </Style>
+
+        <!-- Стили для ListView -->
+        <Style TargetType="ListView">
+            <Setter Property="FontFamily" Value="Papyrus"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#4E4A47"/>
+            <Setter Property="BorderBrush" Value="Goldenrod"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Margin" Value="10"/>
+        </Style>
+
+        <!-- Стили для TabItem -->
+        <Style TargetType="TabItem">
+            <Setter Property="FontFamily" Value="Papyrus"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#4E4A47"/>
+            <Setter Property="BorderBrush" Value="Goldenrod"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Padding" Value="10"/>
+            <Style.Triggers>
+                <!-- Триггер для выбранного состояния -->
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="Goldenrod"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+                <!-- Триггер для наведения мыши -->
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="LightBlue"/>
+                    <!-- Голубой цвет -->
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Стили для ComboBox -->
+        <Style TargetType="ComboBox">
+            <Setter Property="FontFamily" Value="Papyrus"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="0 10"/>
+        </Style>
+
+
+        <!-- Стили для Grid -->
+        <Style TargetType="Grid">
+            <Setter Property="Background" Value="#2D2B1F"/>
+            <Setter Property="Margin" Value="10"/>
+        </Style>
+        <Style x:Key="LightLabelStyle" TargetType="Label">
+            <Setter Property="FontFamily" Value="Papyrus"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="0 15"/>
+        </Style>
+
+    </UserControl.Resources>
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="4,0,0,0" >
+        <Grid Height="1006">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TabControl Height="1000" VerticalAlignment="Top" Margin="0,10,10,0">
+                <!--<TabItem Header="Sources">
                 <Grid Background="#fcba03">
                     -->
-            <!-- Content -->
-            <!--
+                <!-- Content -->
+                <!--
                 </Grid>
             </TabItem>-->
-            <TabItem Header="Class">
-                <Grid>
-                    <ListView ItemsSource="{Binding AvailableClasses}" SelectedItem="{Binding ClickedClass, Mode=TwoWay}">
-                        <ListView.Resources>
-                            <!-- Unselected Item Template -->
-                            <DataTemplate x:Key="DefaultClassTemplate">
-                                <TextBlock FontSize="14" Margin="5,0" Text="{Binding Name}" />
-                            </DataTemplate>
-
-                            <!-- Selected Item Template -->
-                            <DataTemplate x:Key="SelectedClassTemplate">
-                                <Grid Margin="10">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition></RowDefinition>
-                                        <!-- avatar-->
-                                        <RowDefinition></RowDefinition>
-                                        <!-- name -->
-                                        <RowDefinition></RowDefinition>
-                                        <!-- source -->
-                                        <RowDefinition></RowDefinition>
-                                        <!-- hit dice -->
-                                        <RowDefinition Height="auto"></RowDefinition>
-                                        <!-- feats -->
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition></ColumnDefinition>
-                                        <!-- class -->
-                                        <ColumnDefinition></ColumnDefinition>
-                                        <!-- subclass -->
-                                    </Grid.ColumnDefinitions>
-                                    <!--<Image Grid.Row="0" Grid.Column="0" Source="{Binding ClassImage}"></Image> avatar-->
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Name}"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding Source}"/>
-                                    <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
-                                        <TextBlock Text="Hit dice: d"/>
-                                        <TextBlock Text="{Binding HitDieType}"/>
-                                    </StackPanel>
-                                    <!-- Changed ListView to ItemsControl for ClassFeats -->
-                                    <ItemsControl Grid.Row="4" Grid.Column="0" ItemsSource="{Binding ClassFeats}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Orientation="Vertical">
-                                                    <TextBlock Text="Feat Details" FontWeight="Bold" FontSize="16"/>
-                                                    <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold"/>
-                                                    <TextBlock Text="{Binding Description}" FontSize="12"/>
-                                                    <TextBlock Text="Multiclass Info:" FontWeight="Bold"/>
-                                                    <TextBlock Text="{Binding MultiClassInfo}" FontSize="12"/>
-                                                    <!-- Unlock Level -->
-                                                    <TextBlock Text="Unlock at Level:" FontWeight="Bold"/>
-                                                    <TextBlock Text="{Binding UnlockAtLevel}" FontSize="12"/>
-                                                    <!-- Displaying the options if available -->
-                                                    <TextBlock Text="Feat Options:" FontWeight="Bold" FontSize="14" Margin="0,10,0,0"/>
-                                                    <!-- TODO: change feat options to handle List<Tuple<string, string>> FeatOptions -->
-                                                    <ItemsControl ItemsSource="{Binding FeatOptions}">
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <StackPanel Orientation="Vertical">
-                                                                    <CheckBox Content="{Binding Name}" />
-                                                                    <TextBlock Text=" - " />
-                                                                    <TextBlock Text="{Binding Description}" />
-                                                                </StackPanel>
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                    <Button Content="Choose Class" 
-                                            Command="{Binding DataContext.ChooseClassCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" 
-                                            CommandParameter="{Binding}"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.Resources>
-
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <!-- Default Style for all items -->
-                                <Setter Property="ContentTemplate" Value="{StaticResource DefaultClassTemplate}" />
-                                <Style.Triggers>
-                                    <!-- Trigger for selected item -->
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="ContentTemplate" Value="{StaticResource SelectedClassTemplate}" />
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ListView.ItemContainerStyle>
-                    </ListView>
-                </Grid>
-            </TabItem>
-            <TabItem Header="Species">
-                <Grid>
-                    <Grid>
-                        <ListView ItemsSource="{Binding AvailableSpecies}" SelectedItem="{Binding ClickedSpecies, Mode=TwoWay}">
+                <TabItem Header="Class">
+                    <Grid Height="1104" Margin="0,0,-4,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <ListView ItemsSource="{Binding AvailableClasses}" SelectedItem="{Binding ClickedClass, Mode=TwoWay}" Margin="10,10,10,0" Height="916" VerticalAlignment="Top">
                             <ListView.Resources>
                                 <!-- Unselected Item Template -->
-                                <DataTemplate x:Key="DefaultSpeciesTemplate">
-                                    <TextBlock FontSize="14" Margin="5,0" Text="{Binding Name}" />
+                                <DataTemplate x:Key="DefaultClassTemplate">
+                                    <TextBlock FontSize="16" Margin="5,0" Text="{Binding Name}" />
                                 </DataTemplate>
 
                                 <!-- Selected Item Template -->
-                                <DataTemplate x:Key="SelectedSpeciesTemplate">
-                                    <Grid Margin="10">
+                                <DataTemplate x:Key="SelectedClassTemplate">
+                                    <Grid Margin="16">
                                         <Grid.RowDefinitions>
                                             <RowDefinition></RowDefinition>
                                             <!-- avatar-->
@@ -161,8 +203,12 @@
                                         <!--<Image Grid.Row="0" Grid.Column="0" Source="{Binding ClassImage}"></Image> avatar-->
                                         <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Name}"/>
                                         <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding Source}"/>
-                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding Description}"/>
-                                        <ItemsControl Grid.Row="4" Grid.Column="0" ItemsSource="{Binding SpeciesFeats}">
+                                        <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
+                                            <TextBlock Text="Hit dice: d"/>
+                                            <TextBlock Text="{Binding HitDieType}"/>
+                                        </StackPanel>
+                                        <!-- Changed ListView to ItemsControl for ClassFeats -->
+                                        <ItemsControl Grid.Row="4" Grid.Column="0" ItemsSource="{Binding ClassFeats}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <StackPanel Orientation="Vertical">
@@ -176,11 +222,11 @@
                                                         <TextBlock Text="{Binding UnlockAtLevel}" FontSize="12"/>
                                                         <!-- Displaying the options if available -->
                                                         <TextBlock Text="Feat Options:" FontWeight="Bold" FontSize="14" Margin="0,10,0,0"/>
-                                                        <!-- If the feat has options, this will display them -->
+                                                        <!-- TODO: change feat options to handle List<Tuple<string, string>> FeatOptions -->
                                                         <ItemsControl ItemsSource="{Binding FeatOptions}">
                                                             <ItemsControl.ItemTemplate>
                                                                 <DataTemplate>
-                                                                    <StackPanel Orientation="Horizontal">
+                                                                    <StackPanel Orientation="Vertical">
                                                                         <CheckBox Content="{Binding Name}" />
                                                                         <TextBlock Text=" - " />
                                                                         <TextBlock Text="{Binding Description}" />
@@ -192,9 +238,14 @@
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
-                                        <Button Content="Choose Species" 
-                                                Command="{Binding DataContext.ChooseSpeciesCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" 
-                                                CommandParameter="{Binding}"/>
+                                        <!-- Button for choosing a class -->
+                                        <Button Content="Choose Class" 
+            Command="{Binding DataContext.ChooseClassCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" 
+            CommandParameter="{Binding}"
+            Background="Goldenrod"
+            Foreground="#4E4A47"
+            Width="150"
+            HorizontalAlignment="Center"/>
                                     </Grid>
                                 </DataTemplate>
                             </ListView.Resources>
@@ -202,157 +253,249 @@
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem">
                                     <!-- Default Style for all items -->
-                                    <Setter Property="ContentTemplate" Value="{StaticResource DefaultSpeciesTemplate}" />
+                                    <Setter Property="ContentTemplate" Value="{StaticResource DefaultClassTemplate}" />
                                     <Style.Triggers>
                                         <!-- Trigger for selected item -->
                                         <Trigger Property="IsSelected" Value="True">
-                                            <Setter Property="ContentTemplate" Value="{StaticResource SelectedSpeciesTemplate}" />
+                                            <Setter Property="ContentTemplate" Value="{StaticResource SelectedClassTemplate}" />
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
                             </ListView.ItemContainerStyle>
                         </ListView>
                     </Grid>
-                </Grid>
-            </TabItem>
-            <TabItem Header="Ability Scores">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition></RowDefinition>
-                        <RowDefinition></RowDefinition>
-                        <RowDefinition></RowDefinition>
-                        <RowDefinition></RowDefinition>
-                        <RowDefinition></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="132*"></ColumnDefinition>
-                        <ColumnDefinition Width="96*"></ColumnDefinition>
-                        <ColumnDefinition Width="37*"/>
-                        <ColumnDefinition Width="132*"></ColumnDefinition>
-                        <ColumnDefinition Width="132*"></ColumnDefinition>
-                        <ColumnDefinition Width="132*"></ColumnDefinition>
-                        <ColumnDefinition Width="132*"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="7" Text="Choose your ability scores"/>
-                    <TextBlock Grid.Column="0" Grid.ColumnSpan="7" Text="Enter values manually, choose from standard array or roll random values" Margin="0,84,0,84" Grid.RowSpan="3"/>
-                    <ComboBox Grid.Column="0" Grid.Row="2" IsEditable="True" Text="{Binding Strength, Mode=TwoWay}" Margin="0,84,0,84" Grid.RowSpan="3">
-                        <ComboBox.ItemsSource>
-                            <x:Array Type="{x:Type sys:Int32}">
-                                <sys:Int32>15</sys:Int32>
-                                <sys:Int32>14</sys:Int32>
-                                <sys:Int32>13</sys:Int32>
-                                <sys:Int32>12</sys:Int32>
-                                <sys:Int32>10</sys:Int32>
-                                <sys:Int32>8</sys:Int32>
-                            </x:Array>
-                        </ComboBox.ItemsSource>
-                    </ComboBox>
-                    <Button Grid.Column="0" Grid.Row="4" Content="Roll" 
-                            Command="{Binding RollAbilityCommand}" 
-                            CommandParameter="Strength"/>
+                </TabItem>
 
-                    <ComboBox  Grid.Row="2" IsEditable="True" Text="{Binding Dexterity, Mode=TwoWay}" Grid.ColumnSpan="4" Margin="132,84,132,84" Grid.RowSpan="3">
-                        <ComboBox.ItemsSource>
-                            <x:Array Type="{x:Type sys:Int32}">
-                                <sys:Int32>15</sys:Int32>
-                                <sys:Int32>14</sys:Int32>
-                                <sys:Int32>13</sys:Int32>
-                                <sys:Int32>12</sys:Int32>
-                                <sys:Int32>10</sys:Int32>
-                                <sys:Int32>8</sys:Int32>
-                            </x:Array>
-                        </ComboBox.ItemsSource>
-                    </ComboBox>
-                    <Button Grid.Row="4" Content="Roll" 
-                            Command="{Binding RollAbilityCommand}" 
-                            CommandParameter="Dexterity" Grid.ColumnSpan="4" Margin="132,0,132,0"/>
+                <TabItem Header="Species">
+                    <Grid Height="977" Margin="0,0,-4,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid Margin="0,10,10,10">
+                            <ListView ItemsSource="{Binding AvailableSpecies}" SelectedItem="{Binding ClickedSpecies, Mode=TwoWay}" Margin="10,0,1,58">
+                                <ListView.Resources>
+                                    <!-- Unselected Item Template -->
+                                    <DataTemplate x:Key="DefaultSpeciesTemplate">
+                                        <TextBlock FontSize="14" Margin="5,0" Text="{Binding Name}" />
+                                    </DataTemplate>
 
-                    <ComboBox Grid.Column="3"  Grid.Row="2" IsEditable="True" Text="{Binding Constitution, Mode=TwoWay}" Margin="0,84,0,84" Grid.RowSpan="3">
-                        <ComboBox.ItemsSource>
-                            <x:Array Type="{x:Type sys:Int32}">
-                                <sys:Int32>15</sys:Int32>
-                                <sys:Int32>14</sys:Int32>
-                                <sys:Int32>13</sys:Int32>
-                                <sys:Int32>12</sys:Int32>
-                                <sys:Int32>10</sys:Int32>
-                                <sys:Int32>8</sys:Int32>
-                            </x:Array>
-                        </ComboBox.ItemsSource>
-                    </ComboBox>
-                    <Button Grid.Column="3" Grid.Row="4" Content="Roll" 
-                            Command="{Binding RollAbilityCommand}" 
-                            CommandParameter="Constitution"/>
+                                    <!-- Selected Item Template -->
+                                    <DataTemplate x:Key="SelectedSpeciesTemplate">
+                                        <Grid Margin="10">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition></RowDefinition>
+                                                <!-- avatar-->
+                                                <RowDefinition></RowDefinition>
+                                                <!-- name -->
+                                                <RowDefinition></RowDefinition>
+                                                <!-- source -->
+                                                <RowDefinition></RowDefinition>
+                                                <!-- hit dice -->
+                                                <RowDefinition Height="auto"></RowDefinition>
+                                                <!-- feats -->
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition></ColumnDefinition>
+                                                <!-- class -->
+                                                <ColumnDefinition></ColumnDefinition>
+                                                <!-- subclass -->
+                                            </Grid.ColumnDefinitions>
+                                            <!--<Image Grid.Row="0" Grid.Column="0" Source="{Binding ClassImage}"></Image> avatar-->
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Name}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding Source}"/>
+                                            <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding Description}"/>
+                                            <ItemsControl Grid.Row="4" Grid.Column="0" ItemsSource="{Binding SpeciesFeats}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Orientation="Vertical">
+                                                            <TextBlock Text="Feat Details" FontWeight="Bold" FontSize="16"/>
+                                                            <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold"/>
+                                                            <TextBlock Text="{Binding Description}" FontSize="12"/>
+                                                            <TextBlock Text="Multiclass Info:" FontWeight="Bold"/>
+                                                            <TextBlock Text="{Binding MultiClassInfo}" FontSize="12"/>
+                                                            <!-- Unlock Level -->
+                                                            <TextBlock Text="Unlock at Level:" FontWeight="Bold"/>
+                                                            <TextBlock Text="{Binding UnlockAtLevel}" FontSize="12"/>
+                                                            <!-- Displaying the options if available -->
+                                                            <TextBlock Text="Feat Options:" FontWeight="Bold" FontSize="14" Margin="0,10,0,0"/>
+                                                            <!-- If the feat has options, this will display them -->
+                                                            <ItemsControl ItemsSource="{Binding FeatOptions}">
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <CheckBox Content="{Binding Name}" />
+                                                                            <TextBlock Text=" - " />
+                                                                            <TextBlock Text="{Binding Description}" />
+                                                                        </StackPanel>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                            <Button Content="Choose Species" 
+                                                Command="{Binding DataContext.ChooseSpeciesCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" 
+                                                CommandParameter="{Binding}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.Resources>
 
-                    <ComboBox Grid.Column="4"  Grid.Row="2" IsEditable="True" Text="{Binding Intelligence, Mode=TwoWay}" Margin="0,84,0,84" Grid.RowSpan="3">
-                        <ComboBox.ItemsSource>
-                            <x:Array Type="{x:Type sys:Int32}">
-                                <sys:Int32>15</sys:Int32>
-                                <sys:Int32>14</sys:Int32>
-                                <sys:Int32>13</sys:Int32>
-                                <sys:Int32>12</sys:Int32>
-                                <sys:Int32>10</sys:Int32>
-                                <sys:Int32>8</sys:Int32>
-                            </x:Array>
-                        </ComboBox.ItemsSource>
-                    </ComboBox>
-                    <Button Grid.Column="4" Grid.Row="4" Content="Roll" 
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <!-- Default Style for all items -->
+                                        <Setter Property="ContentTemplate" Value="{StaticResource DefaultSpeciesTemplate}" />
+                                        <Style.Triggers>
+                                            <!-- Trigger for selected item -->
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="ContentTemplate" Value="{StaticResource SelectedSpeciesTemplate}" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                            </ListView>
+                        </Grid>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Ability Scores">
+                    <Grid Height="979" Margin="0,10,0,10" Width="auto">
+                        <Grid.RowDefinitions>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="22"></ColumnDefinition>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="120"></ColumnDefinition>
+                            <ColumnDefinition Width="120"></ColumnDefinition>
+                            <ColumnDefinition Width="120"></ColumnDefinition>
+                            <ColumnDefinition Width="120"></ColumnDefinition>
+                            <ColumnDefinition Width="120"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="3" Foreground="Gainsboro" Text="Choose your ability scores" Margin="10,20,0,10" Width="276"/>
+                        <TextBlock Grid.Column="1" Grid.ColumnSpan="6" Foreground="Gainsboro" Text="Enter values manually, choose from standard array or roll random values" Margin="13,70,0,98" Grid.RowSpan="3" Width="701"/>
+                        <ComboBox Grid.Column="0" Grid.Row="3" IsEditable="True"  Text="{Binding Strength, Mode=TwoWay}" Margin="16,78,0,78" Grid.ColumnSpan="2" HorizontalAlignment="Left" Width="116">
+                            <ComboBox.ItemsSource>
+                                <x:Array Type="{x:Type sys:Int32}">
+                                    <sys:Int32>15</sys:Int32>
+                                    <sys:Int32>14</sys:Int32>
+                                    <sys:Int32>13</sys:Int32>
+                                    <sys:Int32>12</sys:Int32>
+                                    <sys:Int32>10</sys:Int32>
+                                    <sys:Int32>8</sys:Int32>
+                                </x:Array>
+                            </ComboBox.ItemsSource>
+                        </ComboBox>
+                        <Button Grid.Row="4" Content="Roll" Foreground="Gainsboro" 
                             Command="{Binding RollAbilityCommand}" 
-                            CommandParameter="Intelligence"/>
+                            CommandParameter="Strength" Margin="17,73,15,73" Grid.ColumnSpan="2" />
 
-                    <ComboBox Grid.Column="4"  Grid.Row="2" IsEditable="True" Text="{Binding Wisdom, Mode=TwoWay}" Grid.ColumnSpan="3" Margin="132,84,132,84" Grid.RowSpan="3">
-                        <ComboBox.ItemsSource>
-                            <x:Array Type="{x:Type sys:Int32}">
-                                <sys:Int32>15</sys:Int32>
-                                <sys:Int32>14</sys:Int32>
-                                <sys:Int32>13</sys:Int32>
-                                <sys:Int32>12</sys:Int32>
-                                <sys:Int32>10</sys:Int32>
-                                <sys:Int32>8</sys:Int32>
-                            </x:Array>
-                        </ComboBox.ItemsSource>
-                    </ComboBox>
-                    <Button Grid.Column="4" Grid.Row="4" Content="Roll" 
+                        <ComboBox  Grid.Row="3" IsEditable="True" Text="{Binding Dexterity, Mode=TwoWay}" Margin="0,78,10,78" Grid.Column="2">
+                            <ComboBox.ItemsSource>
+                                <x:Array Type="{x:Type sys:Int32}">
+                                    <sys:Int32>15</sys:Int32>
+                                    <sys:Int32>14</sys:Int32>
+                                    <sys:Int32>13</sys:Int32>
+                                    <sys:Int32>12</sys:Int32>
+                                    <sys:Int32>10</sys:Int32>
+                                    <sys:Int32>8</sys:Int32>
+                                </x:Array>
+                            </ComboBox.ItemsSource>
+                        </ComboBox>
+                        <Button Grid.Row="4" Content="Roll" Foreground="Gainsboro"
                             Command="{Binding RollAbilityCommand}" 
-                            CommandParameter="Wisdom" Grid.ColumnSpan="3" Margin="132,0,132,0"/>
+                            CommandParameter="Dexterity" Margin="117,73,0,73" Grid.Column="1" HorizontalAlignment="Left" Width="113" Grid.ColumnSpan="2"/>
 
-                    <ComboBox Grid.Column="6"  Grid.Row="2" IsEditable="True" Text="{Binding Charisma, Mode=TwoWay}" Margin="0,84,0,84" Grid.RowSpan="3">
-                        <ComboBox.ItemsSource>
-                            <x:Array Type="{x:Type sys:Int32}">
-                                <sys:Int32>15</sys:Int32>
-                                <sys:Int32>14</sys:Int32>
-                                <sys:Int32>13</sys:Int32>
-                                <sys:Int32>12</sys:Int32>
-                                <sys:Int32>10</sys:Int32>
-                                <sys:Int32>8</sys:Int32>
-                            </x:Array>
-                        </ComboBox.ItemsSource>
-                    </ComboBox>
-                    <Button Grid.Column="6" Grid.Row="4" Content="Roll" 
+                        <ComboBox Grid.Column="3"  Grid.Row="3" IsEditable="True" Text="{Binding Constitution, Mode=TwoWay}" Margin="0,78,0,78" HorizontalAlignment="Left" Width="110">
+                            <ComboBox.ItemsSource>
+                                <x:Array Type="{x:Type sys:Int32}">
+                                    <sys:Int32>15</sys:Int32>
+                                    <sys:Int32>14</sys:Int32>
+                                    <sys:Int32>13</sys:Int32>
+                                    <sys:Int32>12</sys:Int32>
+                                    <sys:Int32>10</sys:Int32>
+                                    <sys:Int32>8</sys:Int32>
+                                </x:Array>
+                            </ComboBox.ItemsSource>
+                        </ComboBox>
+                        <Button Grid.Column="3" Grid.Row="4" Content="Roll" Foreground="Gainsboro"
                             Command="{Binding RollAbilityCommand}" 
-                            CommandParameter="Charisma"/>
-                </Grid>
-            </TabItem>
-            <TabItem Header="Background">
-                <Grid Margin="10">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="500"/>
-                    </Grid.ColumnDefinitions>
-                    <!--<TextBox Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding BackgroundTitle, UpdateSourceTrigger=PropertyChanged}"/>
+                            CommandParameter="Constitution" Margin="8,73,11,73" Width="NaN"/>
+
+                        <ComboBox Grid.Column="4"  Grid.Row="3" IsEditable="True" Text="{Binding Intelligence, Mode=TwoWay}" Margin="8,78,10,78">
+                            <ComboBox.ItemsSource>
+                                <x:Array Type="{x:Type sys:Int32}">
+                                    <sys:Int32>15</sys:Int32>
+                                    <sys:Int32>14</sys:Int32>
+                                    <sys:Int32>13</sys:Int32>
+                                    <sys:Int32>12</sys:Int32>
+                                    <sys:Int32>10</sys:Int32>
+                                    <sys:Int32>8</sys:Int32>
+                                </x:Array>
+                            </ComboBox.ItemsSource>
+                        </ComboBox>
+                        <Button Grid.Column="4" Grid.Row="4" Content="Roll" Foreground="Gainsboro"
+                            Command="{Binding RollAbilityCommand}" 
+                            CommandParameter="Intelligence" Margin="0,73,10,73"/>
+
+                        <ComboBox Grid.Column="5"  Grid.Row="3" IsEditable="True" Text="{Binding Wisdom, Mode=TwoWay}" Margin="6,78,7,78">
+                            <ComboBox.ItemsSource>
+                                <x:Array Type="{x:Type sys:Int32}">
+                                    <sys:Int32>15</sys:Int32>
+                                    <sys:Int32>14</sys:Int32>
+                                    <sys:Int32>13</sys:Int32>
+                                    <sys:Int32>12</sys:Int32>
+                                    <sys:Int32>10</sys:Int32>
+                                    <sys:Int32>8</sys:Int32>
+                                </x:Array>
+                            </ComboBox.ItemsSource>
+                        </ComboBox>
+                        <Button Grid.Column="5" Grid.Row="4" Content="Roll" Foreground="Gainsboro"
+                            Command="{Binding RollAbilityCommand}" 
+                            CommandParameter="Wisdom" Margin="4,73,6,73"/>
+
+                        <ComboBox Grid.Column="6"  Grid.Row="3" IsEditable="True" Text="{Binding Charisma, Mode=TwoWay}" Margin="10,78,11,78">
+                            <ComboBox.ItemsSource>
+                                <x:Array Type="{x:Type sys:Int32}">
+                                    <sys:Int32>15</sys:Int32>
+                                    <sys:Int32>14</sys:Int32>
+                                    <sys:Int32>13</sys:Int32>
+                                    <sys:Int32>12</sys:Int32>
+                                    <sys:Int32>10</sys:Int32>
+                                    <sys:Int32>8</sys:Int32>
+                                </x:Array>
+                            </ComboBox.ItemsSource>
+                        </ComboBox>
+                        <Button Grid.Column="6" Grid.Row="4" Content="Roll" Foreground="Gainsboro"
+                            Command="{Binding RollAbilityCommand}" 
+                            CommandParameter="Charisma" Margin="4,73,6,73"/>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Background">
+                    <Grid Margin="0,0,-4,0" Height="972">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="48.627"/>
+                            <RowDefinition Height="12.373"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="500"/>
+                        </Grid.ColumnDefinitions>
+                        <!--<TextBox Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding BackgroundTitle, UpdateSourceTrigger=PropertyChanged}"/>
                     <TextBox Grid.Row="1" Grid.Column="1" Margin="5" Text="{Binding BackgroundDescription, UpdateSourceTrigger=PropertyChanged}"/>
                     <ComboBox Name="SkillProficiency1ComboBox" Width="150" 
           SelectedItem="{Binding BackgroundSkill1}" 
@@ -375,40 +518,34 @@
         Command="{Binding SaveBackgroundCommand}"
         Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2" 
         HorizontalAlignment="Center" Margin="5" Width="150"/>-->
-                    <TextBlock Grid.Row="0" Grid.Column="0">Background Title</TextBlock>
-                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding BackgroundTitle}"/>
-                    <TextBlock Grid.Row="1" Grid.Column="0">Character Name</TextBlock>
-                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding CharacterName}"/>
-                    <TextBlock Grid.Row="2" Grid.Column="0">Description</TextBlock>
-                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding BackgroundDescription}"/>
-                    <ComboBox Name="SkillProficiency1ComboBox" Width="150" Grid.Row="3" Grid.Column="0"
+                        <TextBlock Grid.Row="0" Grid.Column="0" Foreground="Gainsboro" Margin="10,15,0,15" Grid.ColumnSpan="2">Background Title</TextBlock>
+                        <TextBox Grid.Row="0" Grid.Column="1" Foreground="Gainsboro" Text="{Binding BackgroundTitle}" Margin="100,11,100,12"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Foreground="Gainsboro" Margin="13,15,0,15">Character Name</TextBlock>
+                        <TextBox Grid.Row="1" Grid.Column="1" Foreground="Gainsboro" Text="{Binding CharacterName}" Margin="100,11,100,12"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Foreground="Gainsboro" Margin="21,15,0,15">Description</TextBlock>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding BackgroundDescription}" Margin="100,11,100,11"/>
+                        <ComboBox Name="SkillProficiency1ComboBox" Width="NaN" Grid.Row="3" Grid.Column="0" Foreground="Black"
                               SelectedItem="{Binding BackgroundSkill1}" 
-                              ItemsSource="{Binding Source={StaticResource SkillsEnumValues}}"/>
-                    <ComboBox Name="SkillProficiency2ComboBox" Width="150" Grid.Row="3" Grid.Column="1"
+                              ItemsSource="{Binding Source={StaticResource SkillsEnumValues}}" Margin="10,10,486,10" BorderBrush="#FF2A2727" Grid.ColumnSpan="2">
+                            <ComboBox.Background>
+                                <LinearGradientBrush EndPoint="0,1">
+                                    <GradientStop Color="#FFF0F0F0"/>
+                                    <GradientStop Color="#FF191818" Offset="1"/>
+                                </LinearGradientBrush>
+                            </ComboBox.Background>
+                        </ComboBox>
+                        <ComboBox Name="SkillProficiency2ComboBox" Width="NaN" Grid.Row="3" Grid.Column="1"
                               SelectedItem="{Binding BackgroundSkill2}" 
-                              ItemsSource="{Binding Source={StaticResource SkillsEnumValues}}"/>
-                    <TextBlock Grid.Row="4" Grid.Column="0">Tool Proficiencies</TextBlock>
-                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding BackgroundTools}"/>
-                    <TextBlock Grid.Row="5" Grid.Column="0">Known Languages</TextBlock>
-                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding BackgroundLanguages}"/>
-                    <ListView Grid.Row="6" Grid.Column="0"
+                              ItemsSource="{Binding Source={StaticResource SkillsEnumValues}}" Margin="100,10,100,10"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Foreground="Gainsboro" Margin="13,12,0,18" Grid.ColumnSpan="2">Tool Proficiencies</TextBlock>
+                        <TextBox Grid.Row="4" Grid.Column="1"  Text="{Binding BackgroundTools}" Margin="100,12,100,11"/>
+                        <TextBlock Grid.Row="5" Foreground="Gainsboro" Margin="13,14,0,16" Grid.ColumnSpan="2">Known Languages</TextBlock>
+                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding BackgroundLanguages}" Margin="100,11,100,12"/>
+                        <ListView Grid.Row="6" Grid.Column="0"
                               ItemsSource="{Binding AvailableBackgroundItems}"
                               SelectedItem="{Binding SelectedAvailableItem, Mode=TwoWay}"
-                              SelectionMode="Single">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                    <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal">
-                        <!-- List of Selected Items -->
-                        <ListView 
-                              ItemsSource="{Binding SelectedBackgroundItems}"
-                              SelectedItem="{Binding SelectedSelectedItem, Mode=TwoWay}"
-                              SelectionMode="Single">
+                              SelectionMode="Single" Margin="10,10,10,10">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
@@ -417,89 +554,106 @@
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
-                        <Button Content="Move" Command="{Binding MoveToSelectedCommand}"/>
-                    </StackPanel>
+                        <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Margin="100,10,100,10">
+                            <!-- List of Selected Items -->
+                            <ListView 
+                              ItemsSource="{Binding SelectedBackgroundItems}"
+                              SelectedItem="{Binding SelectedSelectedItem, Mode=TwoWay}"
+                              SelectionMode="Single">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                            <Button Content="Move" Command="{Binding MoveToSelectedCommand}" Foreground="Gainsboro"/>
+                        </StackPanel>
 
-                    <TextBlock Grid.Row="7" Grid.Column="0">Ideal</TextBlock>
-                    <TextBox Grid.Row="7" Grid.Column="1" Margin="5" Text="{Binding BackgroundIdeal, UpdateSourceTrigger=PropertyChanged}"/>
-                    <TextBlock Grid.Row="8" Grid.Column="0">Flaw</TextBlock>
-                    <TextBox Grid.Row="8" Grid.Column="1" Margin="5" Text="{Binding BackgroundFlaw, UpdateSourceTrigger=PropertyChanged}"/>
-                    <TextBlock Grid.Row="9" Grid.Column="0">Bond</TextBlock>
-                    <TextBox Grid.Row="9" Grid.Column="1" Margin="5" Text="{Binding BackgroundBond, UpdateSourceTrigger=PropertyChanged}"/>
-                    <TextBlock Grid.Row="10" Grid.Column="0">Select a Feat</TextBlock>
-                    <!--<ComboBox Grid.Row="9" Grid.Column="1" 
+                        <TextBlock Grid.Row="7" Grid.Column="0" Foreground="Gainsboro" Margin="13,15,0,15">Ideal</TextBlock>
+                        <TextBox Grid.Row="7" Grid.Column="1" Margin="100,11,100,12" Text="{Binding BackgroundIdeal, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Grid.Row="8" Grid.Column="0" Foreground="Gainsboro" Margin="13,10,0,20">Flaw</TextBlock>
+                        <TextBox Grid.Row="8" Grid.Column="1" Margin="100,11,100,11" Text="{Binding BackgroundFlaw, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Grid.Row="9" Grid.Column="0" Foreground="Gainsboro" Margin="13,19,0,11">Bond</TextBlock>
+                        <TextBox Grid.Row="9" Grid.Column="1" Margin="100,12,100,11" Text="{Binding BackgroundBond, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Grid.Row="10" Grid.Column="0" Foreground="Gainsboro" Margin="13,15,0,15">Select a Feat</TextBlock>
+                        <!--<ComboBox Grid.Row="9" Grid.Column="1" 
                               SelectedItem="{Binding SelectedFeat}" 
                               ItemsSource="{Binding AvailableFeats}" Margin="5"/>-->
-                    <Button Content="Save Background" 
+                        <Button Content="Save Background" 
                             Command="{Binding SaveBackgroundCommand}"
-                            Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="2" 
-                            HorizontalAlignment="Center" Margin="5" Width="150"/>
-                </Grid>
-            </TabItem>
-            <TabItem Header="Starting Equipment">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Label Grid.Row="0" Grid.Column="0">Choose Method to determine Starting Equipment</Label>
-                    <RadioButton Grid.Row="1" Grid.Column="0" Name="ClassBack" GroupName="Equip">Class+Background</RadioButton>
-                    <RadioButton Grid.Row="1" Grid.Column="1" Name="StartGold" GroupName="Equip">Starting Gold</RadioButton>
+                            Grid.Row="11" Grid.Column="1" 
+                            HorizontalAlignment="Left" Margin="37,5,0,6" Width="232" Foreground="Gainsboro" Grid.RowSpan="2"/>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Starting Equipment">
+                    <Grid Margin="0,0,-7,0" Height="952" Width="auto">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="127*"/>
+                            <ColumnDefinition Width="43*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Content="Choose Method to determine Starting Equipment" 
+       Style="{StaticResource LightLabelStyle}" HorizontalAlignment="Center" Margin="0,15,0,15" Width="535"/>
+                        <RadioButton Grid.Row="1" Grid.Column="0" Name="ClassBack" GroupName="Equip" Height="30">Class+Background</RadioButton>
+                        <RadioButton Grid.Row="1" Grid.Column="1" Name="StartGold" GroupName="Equip" Height="30" RenderTransformOrigin="-0.778,0.546">Starting Gold</RadioButton>
 
-                    <!-- Class + Background Visibility -->
-                    <TextBlock Grid.Row="2" Grid.Column="0"
-                   Visibility="{Binding IsChecked, ElementName=ClassBack, Converter={StaticResource convVisibility}}">
+                        <!-- Class + Background Visibility -->
+                        <TextBlock Grid.Row="2" Grid.Column="0"
+                   Visibility="{Binding IsChecked, ElementName=ClassBack, Converter={StaticResource convVisibility}}" Margin="0,15,0,15" Width="0"  Foreground="White">
             Class + Background
-                    </TextBlock>
+                        </TextBlock>
 
-                    <!-- ListView for Selecting Starting Items Group -->
-                    <ListView Grid.Row="3" Grid.Column="0" Height="100"
-                  Visibility="{Binding IsChecked, ElementName=ClassBack, Converter={StaticResource convVisibility}}"
-                  ItemsSource="{Binding ChosenClass.StartingItemsOptions}"
+                        <!-- ListView for Selecting Starting Items Group -->
+                        <ListView Grid.Column="0"
+                  Visibility="{Binding IsChecked, ElementName=ClassBack, Converter={StaticResource convVisibility}}"  Foreground="White" Margin="23,10,341,10" Grid.Row="3">
+                            ItemsSource="{Binding ChosenClass.StartingItemsOptions}"
                   SelectedItem="{Binding SelectedStartingItemsOption, Mode=TwoWay}"
-                  SelectionMode="Single">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical">
-                                    <TextBlock Text="Starting Items Option:" FontWeight="Bold"/>
-                                    <ListView ItemsSource="{Binding}">
-                                        <ListView.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ListView.ItemTemplate>
-                                    </ListView>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                  SelectionMode="Single" Margin="10,44,10,44"  Foreground="White">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock Text="Starting Items Option:" FontWeight="Bold"  Foreground="White"/>
+                                        <ListView ItemsSource="{Binding}" Height="112">
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="Bold"  Foreground="White"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
 
-                    <!-- Starting Gold Visibility -->
-                    <TextBlock Grid.Row="2" Grid.Column="0"
-                   Visibility="{Binding IsChecked, ElementName=StartGold, Converter={StaticResource convVisibility}}">
+                        <!-- Starting Gold Visibility -->
+                        <TextBlock Grid.Row="2" Grid.Column="0"
+                   Visibility="{Binding IsChecked, ElementName=StartGold, Converter={StaticResource convVisibility}}" Margin="0,15,0,15" Width="0" Foreground="White" >
             Starting Gold
-                    </TextBlock>
+                        </TextBlock>
 
-                    <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0"
-                    Visibility="{Binding IsChecked, ElementName=StartGold, Converter={StaticResource convVisibility}}">
-                        <TextBlock Text="Your Character will gain: "/>
-                        <TextBlock Text="{Binding ChosenClass.StartingGold}"/>
-                        <TextBlock Text=" Gold Coins"/>
-                    </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0"
+                    Visibility="{Binding IsChecked, ElementName=StartGold, Converter={StaticResource convVisibility}}" Margin="10,10,10,10">
+                            <TextBlock Text="Your Character will gain: "  Foreground="White"/>
+                            <TextBlock Text="{Binding ChosenClass.StartingGold}"  Foreground="White" />
+                            <TextBlock Text=" Gold Coins" Foreground="White" />
+                        </StackPanel>
 
-                    <!-- Create Character Button -->
-                    <Button Content="Create Character" Grid.Column="0" Grid.Row="4" Command="{Binding CreateCharacterCommand}"/>
-                </Grid>
-            </TabItem>
-        </TabControl>
-    </Grid>
+                        <!-- Create Character Button -->
+                        <Button Content="Create Character" Grid.Column="0" Grid.Row="4" 
+        Command="{Binding CreateCharacterCommand}" Width="NaN" Foreground="Gainsboro" Margin="298,45,36,95"/>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

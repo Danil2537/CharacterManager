@@ -20,7 +20,7 @@ namespace CharacterManager
     {
         private readonly NavigationStore _navigationStore;
         private readonly CharacterManagerDbContextFactory _contextFactory;
-        private const string CONNECTION_STRING = @"Data Source=C:\Documents\Labs\CharacterManager\charactermanager.db";
+        private const string CONNECTION_STRING = @"Data Source=D:\3 курс\Фреймворки розробки програмного забезпечення\лаб 5\CharacterManager\charactermanager.db";
 
         public App()
         {

@@ -64,8 +64,41 @@ namespace CharacterManager.Models
 
         public Class(ClassDTO classDTO)
         {
+            this.Name = classDTO.Name;
+            this.Source = classDTO.Source;
+            this.Description = classDTO.Description;
+            this.MainAbility = classDTO.MainAbility;
+            this.HitDieType = classDTO.HitDieType;
+            this.HitDieNumber = classDTO.HitDieNumber;
+            this.SubclassLevel = classDTO.SubclassLevel;
+            this.SubclassDescription = classDTO.SubclassDescription;
 
+            this.AbilityIncreaseLevels = classDTO.AbilityIncreaseLevelsSerialized?.Split(',')
+                                             .Select(int.Parse)
+                                             .ToList() ?? new List<int>();
+            this.HaveSpells = classDTO.HaveSpells;
+            this.SkillProficienciesNumber = classDTO.SkillProficienciesNumber;
+            this.SkillExpertisesNumber = classDTO.SkillExpertisesNumber;
+
+            this.ProficientSavingThrows = new HashSet<Abilities>(classDTO.ProficientSavingThrowsSerialized?.Split(',')
+                                             .Select(str => (Abilities)Enum.Parse(typeof(Abilities), str))
+                                             ?? new List<Abilities>());
+
+            this.SkillProfOptions = classDTO.SkillProfOptionsSerialized?.Split(',')
+                                         .Select(str => (Skills)Enum.Parse(typeof(Skills), str))
+                                         .ToList() ?? new List<Skills>();
+
+            this.ProficientSkills = new HashSet<Skills>(classDTO.ProficientSkillsSerialized?.Split(',')
+                                         .Select(str => (Skills)Enum.Parse(typeof(Skills), str))
+                                         ?? new List<Skills>());
+
+            this.ExpertiseSkills = new HashSet<Skills>(classDTO.ExpertiseSkillsSerialized?.Split(',')
+                                       .Select(str => (Skills)Enum.Parse(typeof(Skills), str))
+                                       ?? new List<Skills>());
         }
+
+
+
 
         public void AddSavingThrowProficiency(Abilities ability)
         {

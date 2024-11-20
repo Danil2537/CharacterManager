@@ -5,43 +5,101 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CharacterManager.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-        </Grid.RowDefinitions>
-        <TextBlock Grid.Row="1" Text="{Binding User.UserName, StringFormat='Hello {0}'}" FontSize="40" HorizontalAlignment="Left"></TextBlock>
-        <Button Grid.Row="1" Command="{Binding CreateCharacterCommand}" Content="Create a Character" HorizontalAlignment="Right"></Button>
-        <TextBox Grid.Row="2" Text="Search by name, level, class or species" HorizontalAlignment="Left"></TextBox>
-        <Button Grid.Row="2" Command="{Binding  CreateCharacterCommand}" Content="Settings" HorizontalAlignment="Right"></Button>
-        <ListView Grid.Row="3" ItemsSource="{Binding User.CharacterList}">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <Border BorderThickness="1" BorderBrush="Gray" Padding="10" Margin="5">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                            <StackPanel Orientation="Horizontal" Width="200">
-                                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" />
-                                <TextBlock Text="{Binding CharClass.Name}" />
-                                <TextBlock Text="{Binding CharSpecies.Name}" />
-                                <TextBlock Text="Level: " />
-                                <TextBlock Text="{Binding Level}" />
+             d:DesignHeight="600" d:DesignWidth="800"
+             HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <UserControl.Resources>
+        <!-- Стиль для Label -->
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Papyrus"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="Foreground" Value="Gainsboro"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="0 15"/>
+        </Style>
+
+        <!-- Стиль для TextBox -->
+        <Style TargetType="TextBox">
+            <Setter Property="FontFamily" Value="Papyrus"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="DimGray"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="Width" Value="300"/>
+        </Style>
+
+        <!-- Стиль для Button -->
+        <Style TargetType="Button">
+            <Setter Property="FontFamily" Value="Papyrus"/>
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#4E4A47"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="Width" Value="300"/>
+            <Setter Property="BorderBrush" Value="Goldenrod"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Margin" Value="0 15"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="Goldenrod"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <Grid Background="#2D2B1F">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" MinHeight="93"/>
+                <RowDefinition Height="66"/>
+                <RowDefinition Height="Auto" MinHeight="34"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <!-- Приветствие -->
+            <TextBlock Grid.Row="1" Text="{Binding User.UserName, StringFormat='Hello {0}'}" FontSize="40" Foreground="Goldenrod" Margin="15,15,0,15"/>
+
+            <!-- Кнопка для создания персонажа -->
+            <Button Grid.Row="1" Command="{Binding CreateCharacterCommand}" Content="Create a Character" Margin="575,22,0,21" Width="210" HorizontalAlignment="Left"/>
+
+            <!-- Поле для поиска -->
+            <TextBox Grid.Row="2" Text="Search by name, level, class or species" HorizontalAlignment="Left" Margin="15,5,0,0" Width="316" Height="51" VerticalAlignment="Top"/>
+
+            <!-- Кнопка настроек -->
+            <Button Grid.Row="2" Command="{Binding SettingsCommand}" Content="Settings" HorizontalAlignment="Left" Margin="670,0,0,0" Width="115" Height="50" VerticalAlignment="Top"/>
+
+            <!-- Список персонажей -->
+            <ListView Grid.Row="3" ItemsSource="{Binding User.CharacterList}" Margin="15,0,15,30">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="1" BorderBrush="DimGray" Padding="10" Margin="5">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                <!-- Информация о персонаже -->
+                                <StackPanel Orientation="Horizontal" Width="200">
+                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" Foreground="Gainsboro" />
+                                    <TextBlock Text="{Binding CharClass.Name}" Foreground="Gainsboro"/>
+                                    <TextBlock Text="{Binding CharSpecies.Name}" Foreground="Gainsboro"/>
+                                    <TextBlock Text="Level: " Foreground="Gainsboro"/>
+                                    <TextBlock Text="{Binding Level}" Foreground="Gainsboro"/>
+                                </StackPanel>
+
+                                <!-- Кнопки действий -->
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Content="View" Margin="5" Background="#4E4A47" Foreground="White" BorderBrush="Goldenrod"/>
+                                    <Button Content="Edit" Margin="5" Background="#4E4A47" Foreground="White" BorderBrush="Goldenrod"/>
+                                    <Button Content="Delete" Margin="5" Background="#4E4A47" Foreground="White" BorderBrush="Goldenrod"
+                                            Command="{Binding DataContext.DeleteCharacterCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                            CommandParameter="{Binding}" />
+                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <Button Content="View" Margin="5" />
-                                <Button Content="Edit" Margin="5" />
-                                <Button Content="Delete"
-                                        Margin="5"
-                                        Command="{Binding DataContext.DeleteCharacterCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                        CommandParameter="{Binding}" />
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-    </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

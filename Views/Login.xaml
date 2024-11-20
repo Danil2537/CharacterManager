@@ -5,38 +5,96 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CharacterManager.Views" xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="198*"/>
-            <ColumnDefinition Width="441*"/>
-            <ColumnDefinition Width="161*"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <Label Content="{Binding Errors}" Grid.Column="1" Grid.Row="1"/>
-        <Label Content="Login" HorizontalAlignment="Center" Grid.Column="1" Grid.Row="2"/>
-        <Label Content="Username" Grid.Column="1" Grid.Row="3"/>
-        <TextBox Text="{Binding EnteredUsername, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Grid.Row="4"/>
-        <Label Content="Password" Grid.Column="1" Grid.Row="5"/>
-        <TextBox Text="{Binding EnteredPassword, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Grid.Row="6"/>
-        <Button Content="Login" Grid.Column="1" Grid.Row="7" HorizontalAlignment="Center" MinWidth="500"
-                Command="{Binding DataContext.LoginCommand, 
-                RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" 
-                CommandParameter="{Binding}"/>
-        <Button Content="Register" Grid.Column="1" Grid.Row="8" HorizontalAlignment="Center" MinWidth="500"
-                Command="{Binding DataContext.RegisterCommand,
-                RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" 
-                CommandParameter="{Binding}"/>
-    </Grid>
+             d:DesignWidth="800"
+             HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <UserControl.Resources>
+        <!-- Стилі для кнопок та тексту -->
+        <Style TargetType="Label">
+            <Setter Property="FontFamily" Value="Papyrus"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="Foreground" Value="Gainsboro"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0 15"/>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="FontFamily" Value="Papyrus"/>
+            <Setter Property="FontSize" Value="19"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="DimGray"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Height" Value="47"/>
+            <Setter Property="Width" Value="300"/>
+        </Style>
+
+        <Style TargetType="Button">
+            <Setter Property="FontFamily" Value="Papyrus"/>
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#4E4A47"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="Width" Value="300"/>
+            <Setter Property="BorderBrush" Value="Goldenrod"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Margin" Value="0 15"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="Goldenrod"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <Grid Background="#2D2B1F">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Помилка -->
+            <Label Content="{Binding Errors}" Grid.Column="1" Grid.Row="1" Foreground="Red" FontSize="14"/>
+
+            <!-- Заголовок -->
+            <Label Content="Login" HorizontalAlignment="Center" Grid.Column="1" Grid.Row="2" FontSize="40" FontFamily="Papyrus" Foreground="Goldenrod" />
+
+            <!-- Лейбл для Username -->
+            <Label Content="Username" Grid.Column="1" Grid.Row="3" />
+
+            <!-- Поле введення для Username -->
+            <TextBox Text="{Binding EnteredUsername, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Grid.Row="4"/>
+
+            <!-- Лейбл для Password -->
+            <Label Content="Password" Grid.Column="1" Grid.Row="5" />
+
+            <!-- Поле введення для Password з більшим нижнім відступом -->
+            <TextBox Text="{Binding EnteredPassword, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Grid.Row="6" Margin="0 0 0 30"/>
+
+            <!-- Кнопка Login -->
+            <Button Content="Login" Grid.Column="1" Grid.Row="7"
+                    Command="{Binding DataContext.LoginCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" 
+                    CommandParameter="{Binding}"/>
+
+            <!-- Кнопка Register -->
+            <Button Content="Register" Grid.Column="1" Grid.Row="8"
+                    Command="{Binding DataContext.RegisterCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" 
+                    CommandParameter="{Binding}"/>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

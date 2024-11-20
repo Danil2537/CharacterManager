@@ -1,32 +1,33 @@
 ﻿using CharacterManager.DbContexts;
 using CharacterManager.DTOs;
+using CharacterManager.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace CharacterManager.Querries
+namespace CharacterManager.Queries
 {
     public class GetAllClassesQuery
     {
         private readonly CharacterManagerDbContextFactory _contextFactory;
-        private readonly List<Models.Class> _classes;
+
+        public List<Class> Classes { get; private set; } = new List<Class>();
 
         public GetAllClassesQuery(CharacterManagerDbContextFactory contextFactory)
         {
             _contextFactory = contextFactory;
         }
 
-        public async Task Execute()
+        public async Task ExecuteAsync()
         {
-            using (CharacterManagerDbContext context = _contextFactory.CreateDbContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
-                List<ClassDTO> classesDTO = await context.Classes.ToListAsync();
-                foreach(ClassDTO classDTO in classesDTO) 
+                var classesDTO = await context.Classes.ToListAsync();
+                Classes.Clear();
+
+                foreach (var classDTO in classesDTO)
                 {
-                    this._classes.Add(new Models.Class(classDTO));
+                    Classes.Add(new Class(classDTO));
                 }
             }
         }
