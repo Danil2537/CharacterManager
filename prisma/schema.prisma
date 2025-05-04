@@ -22,4 +22,52 @@ model User {
     id Int @id @default(autoincrement())
     username String
     password String
+    characters Character[]
+}
+
+model Character {
+    id Int @id @default(autoincrement())
+    userID Int
+    user  User @relation(fields: [userID], references: [id])
+    classID  Int?
+    class Class? @relation("CharacterClass", fields: [classID], references: [id])
+    speciesID  Int?
+    species Species? @relation("CharacterSpecies", fields: [speciesID], references: [id])
+    backgroundID  Int?
+    background Background? @relation("CharacterBackground", fields: [backgroundID], references: [id])
+    subclassID  Int?
+    subclass Subclass? @relation("CharacterSubclass", fields: [subclassID], references: [id])
+    AbilityScores Int[] @default([0,0,0,0,0,0])
+    Modifiers Int[] @default([0,0,0,0,0,0])
+}
+
+model Species {
+    id Int @id @default(autoincrement())
+    Character Character[] @relation("CharacterSpecies")
+}
+
+model Class {
+    id Int @id @default(autoincrement())
+    Character Character[] @relation("CharacterClass")
+    
+}
+
+model Subclass {
+    id Int @id @default(autoincrement())
+    Character Character[] @relation("CharacterSubclass")
+}
+
+model Background {
+    id Int @id @default(autoincrement())
+    Character Character[] @relation("CharacterBackground")
+}
+
+model Spell {
+    id Int @id @default(autoincrement())
+    
+}
+
+model Ability {
+    id Int @id @default(autoincrement())
+    
 }
