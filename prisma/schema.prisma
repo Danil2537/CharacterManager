@@ -25,20 +25,121 @@ model User {
     characters Character[]
 }
 
+enum Abilities {
+    Strength
+    Dexterity
+    Constitution
+    Intelligence
+    Wisdom
+    Charisma
+}
+
+enum Skill {
+  Acrobatics
+  AnimalHandling
+  Arcana
+  Athletics
+  Deception
+  History
+  Insight
+  Intimidation
+  Investigation
+  Medicine
+  Nature
+  Perception
+  Performance
+  Persuasion
+  Religion
+  SleightOfHand
+  Stealth
+  Survival
+}
+
+enum Armors {
+    Light
+    Medium
+    Heavy
+    Shields
+}
+
+
+enum Languages {
+    Common
+    Dwarvish
+    Elvish
+    Gnomish
+    Goblin
+    Halfling
+    Orc
+    Draconic
+    Sylvan
+    Undercommon
+}
+enum WeaponProperty {
+  Simple
+  Melee
+  Ranged
+  Martial
+  Finesse
+  TwoHanded
+  Thrown
+  Versatile
+  Ammunition
+  Loading
+  Heavy
+  Reach
+  Special
+}
+
+
+
+model Weapon {
+  id               Int    @id @default(autoincrement())
+  name             String @unique
+  cost             Int?
+  weight           Int?
+  damageDiceNumber Int
+  damageDiceFaces  Int
+  damageType       String
+  minRange         Int?  // Only for ranged/thrown weapons
+  maxRange         Int? 
+  properties       WeaponProperty[] 
+  CharacterWeaponProficiency CharacterWeaponProficiency[]
+}
+
+model CharacterWeaponProficiency {
+  id          Int    @id @default(autoincrement())
+  characterId Int
+  character   Character @relation(fields: [characterId], references: [id])
+  weaponId    Int?   // Nullable - Used if proficiency is for a specific weapon
+  weapon      Weapon? @relation(fields: [weaponId], references: [id])
+  property    WeaponProperty? // Nullable - Used if proficiency is for a property
+
+  @@index([characterId, property])
+  @@unique([characterId, weaponId, property]) // Prevent duplicate proficiencies
+}
+
 model Character {
-    id Int @id @default(autoincrement())
-    userID Int
-    user  User @relation(fields: [userID], references: [id])
-    classID  Int?
-    class Class? @relation("CharacterClass", fields: [classID], references: [id])
-    speciesID  Int?
-    species Species? @relation("CharacterSpecies", fields: [speciesID], references: [id])
-    backgroundID  Int?
-    background Background? @relation("CharacterBackground", fields: [backgroundID], references: [id])
-    subclassID  Int?
-    subclass Subclass? @relation("CharacterSubclass", fields: [subclassID], references: [id])
-    AbilityScores Int[] @default([0,0,0,0,0,0])
-    Modifiers Int[] @default([0,0,0,0,0,0])
+  id    Int @id @default(autoincrement())
+  userID    Int
+  user  User    @relation(fields: [userID], references: [id])
+  classID   Int?
+  class Class?  @relation("CharacterClass", fields: [classID], references: [id])
+  speciesID Int?
+  species   Species? @relation("CharacterSpecies", fields: [speciesID], references: [id])
+  backgroundID  Int?
+  background    Background? @relation("CharacterBackground", fields: [backgroundID], references: [id])
+  subclassID    Int?
+  subclass  Subclass? @relation("CharacterSubclass", fields: [subclassID], references: [id])
+  AbilityScores Int[]    @default([0,0,0,0,0,0])
+  Modifiers Int[]    @default([0,0,0,0,0,0])
+  Name  String?  @default("Unknown Character Name")
+  Level Int      @default(1)
+  SkillProfs    Skill[]
+  SavingThrows  Abilities[]
+  ArmorProfs    Armors[]
+  KnownLanguages    Languages[]
+  WeaponProficiencies   CharacterWeaponProficiency[]
 }
 
 model Species {
