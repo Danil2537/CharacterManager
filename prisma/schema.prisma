@@ -10,20 +10,139 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@index([name])
-}
 model User {
     id Int @id @default(autoincrement())
     username String
     password String
     characters Character[]
 }
+
+model Character {
+  id    Int @id @default(autoincrement())
+  userID    Int
+  user  User    @relation(fields: [userID], references: [id])
+  speciesID Int?
+  species   Species? @relation("CharacterSpecies", fields: [speciesID], references: [id])
+  backgroundID  Int?
+  background    Background? @relation("CharacterBackground", fields: [backgroundID], references: [id])
+  //the 6 "abilities" are: strength, dexterity, constitution, intelligence, wisdom, charisma;
+  //ALWAYS in this order.  
+  abilityScores Int[]    @default([0,0,0,0,0,0])
+  //each modifier = (abilityScore-10)/2
+  modifiers Int[]    @default([0,0,0,0,0,0])
+  name  String?  @default("Unknown Character Name")
+  //Character can have "proficiencies" with a number of skills;
+  //The list of skills is always the same for all character and is contained in Skills enum; 
+  //The skillProfs just shows which skill checks should add proficiencyBonus to the result of the dice roll
+  skillProfs    Skill[]
+  //Similar to skills, the list of saving throws is always the same, and it is the list of 6 abilities.
+  //The savingThrows field just contains which saving throws get to add proficiencyBonus to rolls
+  savingThrows  Abilities[]
+  //Armor is different from skills and abilities;
+  //"If you wear Light, Medium, or Heavy armor 
+  //and lack training with it, you have Disadvantage on 
+  //any D20 Test that involves Strength or Dexterity, and you can't cast spells." - PHB 2024, page 219
+  //armorProfs field contains, which types of armor a character has "training" with.
+  armorProfs    Armors[]
+  //wow, at least languages are easy
+  knownLanguages    Languages[]
+  //Character can have training with different types to individual weapons, similar to armor;
+  //It can be either a category of weapons like "ranged" or "two-handed"
+  //Or an individual weapon, like "Longsword" or "Shortbow"
+  //If character has training with a weapon,
+  // attacks with this weapon add proficiencyBonus for "to hit" dice rolls
+  //"To Hit" rolls determine wether you hit or miss a target
+  weaponProficiencies   CharacterWeaponProficiency[]
+  //initiative is 1d20+dex modifier
+  //It's being rolled at the start of each combat by all participants
+  //And determines the order of turns
+  //The higher the initiative, the earlier your turn
+  //this initiative field contains bonus to initiative
+  //because it can have additional bonuses outside of just dexterity modifier
+  initiative Int
+  //speed (measured in ft) determines how much character can move on their turn
+  //when using square tiles for combat, each 5 ft is 1 square
+  speed Int
+  //number that depends on total gained levels. 
+  //More levels=bigger prof bonus, per table on PHB 2024, page 41
+  proficiencyBonus Int
+  //How hard it is to hit a character
+  //When enemies roll "to hit", they must get a resuls>=armorClass in order to hit, otherwise they miss;
+  armorClass Int
+  //each level of exhaustion grants several debuffs for a character;
+  //I probably won't implement it in this project, so for now just saving how many levels of it character has 
+  exhaustionLevel Int //todo: constraint to 6
+  //Yes, hit point, not health points. This game was invented before computer games; 
+  maxHitPoints Int
+  currentHitPoints Int 
+  //Hit Point Dice. Class's description tells you the die type of character's Hit Dice
+  //At level 1, character has 1 Hit Die. 
+  //Player can spend Hit Dice during a Short Rest to recover Hit Points.
+  //For example, a character with 4 levels of fighter and 3 levels of wizard would have 4d10+3d6 hit dice,
+  //because each level of fighter grants 1d10, and each wizard level grants 1d6.
+  //On short rest, player can spend any number of these, in any order, to roll
+  //for example, 1d10+2d6, and add result to currentHitPoints, leaving with 3d10+1d6
+  //On long rest, all spent hit dice are restored
+  hitDiceNums Int[] //this basically equals to class levels, but situational bonuses can grant additional hit dice, so I added separate field for this
+  hitDiceTypes Int[] 
+  //Yes, this is XP. Dnd was invented before videogames, and most videogames take heavy inspiration from dnd
+  //most people today don't use xp though, choosing to level up when the story makes sense
+  //yet this still is a valid and used part of rules
+  //XP, required for each level up is in the Character Advancement table, PHB 2024, page 41
+  experience Int 
+  //total levels
+  level Int      @default(1)
+  //classIDs Int[]
+  //By default CharacterClasses would only be the main class, 
+  //but when multiclassing, this array will contain every leveled class
+  characterClasses CharacterClasses[]
+  //classLevels will contain how many levels in each class character has. 
+  //The sum of this array should go into Level field
+  classLevels Int[] 
+  //When reaching level 3 for a class (which can happen several times if multiclassed)
+  //player chooses one of available subclasses for the class;
+  //subclasses grant unique features, on certain levels
+  subclassID    Int?
+  subclass  Subclass? @relation("CharacterSubclass", fields: [subclassID], references: [id])
+  alignment String //not realy a mechanical thing. This is the "lawful good", "chaotic neutral" etc thing;
+  characterItems CharacterItems[]
+  passivePerception Int //Passive Perception = 10 + Wisdom (Perception) check modifier
+  carryingCapacity Int //how mush weight character can carry, in lbs.
+  //on some level ups, player can choose to take either ability score increase or a feat;
+  //This field contains such chosen feats
+  feats Feat[]
+  attacks Attack[]
+  //wis for clerics, int for wizards, cha for sorcerers and warlocks 
+  spellAbility Abilities
+  spellSaveDC Int? // 8 + spellcasting ability modifier + Proficiency Bonus
+  //example: currentSpellSlots=[4,3,2] means 4 lvl1 spells, 3 lvl2 spells and 2 lvl 3 spells
+  currentSpellSlots Int[] //By Spell Level
+  spellSlots Int[] //same as above
+  spellsPreparedNum Int[]//how many spells of each level character can prepare
+  knownCantripsNum Int? //how many cantrips character "knows". Cantrips are lvl0 spells, that don't require spell slots to use
+  spellsKnownNum Int? //todo: check if some classes differentiate known spells by level. afaik, this field only really matters for wizards, and they just "know" certain number with any level configuration
+  spellsKnown Spell[] @relation(name: "spellsKnown") //for bards and sorcerers and such, this is spells learned on lvl-ups. For clerics and such, this contains full spell list of their class (and above spellsKnownNum therefore = class spell List size)
+  spellsPrepared Spell[] @relation(name: "spellsPrepared")//this is a sub-array of spellsKnown
+
+
+}
+
+model Attack {
+    id Int @id
+    name String 
+    toHitBonus Int 
+    notes String 
+    //example: if damageDiceNums=[2,1] and damageDiceTypes=[4,12] and damageTypes=["piercing", "acid"]
+    //then it's 2d4 Piercing + 1d12 Acid damage
+    damageDiceNums Int[] 
+    damageDiceTypes Int[]
+    damageTypes String[] //slashing, piercing, acid etc
+    ability Abilities 
+    addProfBonus Boolean 
+    additionalModifier Int? 
+    Character Character[]
+}
+
 
 enum Abilities {
     Strength
@@ -92,7 +211,6 @@ enum WeaponProperty {
 }
 
 
-
 model Weapon {
   id               Int    @id @default(autoincrement())
   name             String @unique
@@ -104,7 +222,7 @@ model Weapon {
   minRange         Int?  // Only for ranged/thrown weapons
   maxRange         Int? 
   properties       WeaponProperty[] 
-  CharacterWeaponProficiency CharacterWeaponProficiency[]
+  characterWeaponProficiency CharacterWeaponProficiency[]
 }
 
 model CharacterWeaponProficiency {
@@ -119,56 +237,86 @@ model CharacterWeaponProficiency {
   @@unique([characterId, weaponId, property]) // Prevent duplicate proficiencies
 }
 
-model Character {
-  id    Int @id @default(autoincrement())
-  userID    Int
-  user  User    @relation(fields: [userID], references: [id])
-  classID   Int?
-  class Class?  @relation("CharacterClass", fields: [classID], references: [id])
-  speciesID Int?
-  species   Species? @relation("CharacterSpecies", fields: [speciesID], references: [id])
-  backgroundID  Int?
-  background    Background? @relation("CharacterBackground", fields: [backgroundID], references: [id])
-  subclassID    Int?
-  subclass  Subclass? @relation("CharacterSubclass", fields: [subclassID], references: [id])
-  AbilityScores Int[]    @default([0,0,0,0,0,0])
-  Modifiers Int[]    @default([0,0,0,0,0,0])
-  Name  String?  @default("Unknown Character Name")
-  Level Int      @default(1)
-  SkillProfs    Skill[]
-  SavingThrows  Abilities[]
-  ArmorProfs    Armors[]
-  KnownLanguages    Languages[]
-  WeaponProficiencies   CharacterWeaponProficiency[]
-}
-
-model Species {
-    id Int @id @default(autoincrement())
-    Character Character[] @relation("CharacterSpecies")
-}
 
 model Class {
     id Int @id @default(autoincrement())
-    Character Character[] @relation("CharacterClass")
-    
+    characters CharacterClasses[]
+    feats Feat[]
+}
+
+
+model CharacterClasses {
+    @@id([characterId, classId])
+    character Character @relation(fields: [characterId], references:[id])
+    characterId Int
+    class Class @relation(fields: [classId], references: [id])
+    classId Int 
+}
+
+model Species {
+  id        Int     @id @default(autoincrement())
+  name      String  @unique
+  characters Character[] @relation("CharacterSpecies")
+  feats Feat[]
 }
 
 model Subclass {
-    id Int @id @default(autoincrement())
-    Character Character[] @relation("CharacterSubclass")
+  id        Int     @id @default(autoincrement())
+  name      String  @unique
+  characters Character[] @relation("CharacterSubclass")
+  feats Feat[]
 }
 
 model Background {
-    id Int @id @default(autoincrement())
-    Character Character[] @relation("CharacterBackground")
+  id        Int     @id @default(autoincrement())
+  name      String  @unique
+  characters Character[] @relation("CharacterBackground")
+  feats Feat[] @relation("BackgroundFeat")
+}
+
+
+
+model Feat {
+  id             Int      @id @default(autoincrement())
+  name           String
+  description    String
+  featType       String 
+  prerequisites  String 
+  source         String 
+  gainedAtLevel  Int? 
+  classes      Class[]   
+  species      Species[]  
+  subclasses   Subclass[] 
+  background   Background? @relation("BackgroundFeat", fields: [backgroundId], references: [id])
+  backgroundId Int?
+  characters   Character[]
+  isLimitedUse Boolean
+  maxUses Int?
+  spentUses Int?
 }
 
 model Spell {
     id Int @id @default(autoincrement())
-    
+    knownByCharacters Character[] @relation(name: "spellsKnown")
+    preparedByCharacters Character[] @relation(name: "spellsPrepared")
 }
 
 model Ability {
     id Int @id @default(autoincrement())
     
+}
+
+model CharacterItems {
+    @@id([characterId, itemId])
+    character Character @relation(fields: [characterId], references:[id])
+    characterId Int
+    item Item @relation(fields: [itemId], references: [id])
+    itemId Int
+}
+model Item {
+    id Int @id @default(autoincrement())
+    name String 
+    weight Float 
+    price Float 
+    characters CharacterItems[]
 }
