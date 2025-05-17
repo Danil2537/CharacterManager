@@ -10,8 +10,7 @@ import { initTRPC } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import superjson from "superjson";
 import { ZodError } from "zod";
-
-import { db } from "~/server/db";
+import { prisma } from "~/server/db";
 
 /**
  * 1. CONTEXT
@@ -21,8 +20,11 @@ import { db } from "~/server/db";
  * These allow you to access things when processing a request, like the database, the session, etc.
  */
 
-type CreateContextOptions = Record<string, never>;
-
+//type CreateContextOptions = Record<string, never>;
+type CreateContextOptions = {
+  req: CreateNextContextOptions["req"];
+  res: CreateNextContextOptions["res"];
+};
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use it, you can export
  * it from here.
@@ -34,8 +36,10 @@ type CreateContextOptions = Record<string, never>;
  * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
  */
 const createInnerTRPCContext = (_opts: CreateContextOptions) => {
-  return {
-    db,
+   return {
+    req: _opts.req,
+    res: _opts.res,
+    prisma,
   };
 };
 
@@ -46,7 +50,7 @@ const createInnerTRPCContext = (_opts: CreateContextOptions) => {
  * @see https://trpc.io/docs/context
  */
 export const createTRPCContext = (_opts: CreateNextContextOptions) => {
-  return createInnerTRPCContext({});
+  return createInnerTRPCContext({  req: _opts.req, res: _opts.res,});
 };
 
 /**

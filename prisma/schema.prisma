@@ -10,12 +10,12 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model User {
-    id Int @id @default(autoincrement())
-    username String
-    password String
-    characters Character[]
-}
+// model User {
+//     id Int @id @default(autoincrement())
+//     username String
+//     password String
+//     characters Character[]
+// }
 
 enum Ability {
     Strength
@@ -141,7 +141,8 @@ enum SourceType {
 model Character {
     id    Int @id @default(autoincrement())
     userID    Int
-    user  User    @relation(fields: [userID], references: [id])
+    clerkUserId String @default("user_2wBqlT3HS86GneHIm0IGnAeuIVK")
+    //user  User    @relation(fields: [userID], references: [id])
     speciesID Int?
     species   Species? @relation("CharacterSpecies", fields: [speciesID], references: [id])
     backgroundID  Int?
@@ -232,7 +233,7 @@ model Character {
     feats Feat[]
     attacks Attack[]
     //wis for clerics, int for wizards, cha for sorcerers and warlocks 
-    spellAbility Ability
+    spellAbility Ability?
     spellSaveDC Int? // 8 + spellcasting ability modifier + Proficiency Bonus
     //example: currentSpellSlots=[4,3,2] means 4 lvl1 spells, 3 lvl2 spells and 2 lvl 3 spells
     currentSpellSlots Int[] //By Spell Level
@@ -288,6 +289,7 @@ model Class {
     id Int @id @default(autoincrement())
     characters CharacterClasses[]
     feats Feat[]
+    name String @default("Unknown")
     description String 
     primaryAbility Ability 
     hitDiceType Int 
