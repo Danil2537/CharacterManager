@@ -51,7 +51,7 @@ export default function Home() {
     </SignedIn>
             </div>
           <p className="text-2xl text-white">
-            {hello.data ? hello.data.greeting : "Loading tRPC query..."}
+            Some text
           </p>
         </div>
       </main>
