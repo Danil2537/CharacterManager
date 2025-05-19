@@ -1,4 +1,3 @@
-// src/pages/index.tsx
 import Head from "next/head";
 //всё что находиться внутри signedOut будет видно только НЕ залогиненым юзерам
 //всё что находиться внутри signedIn будет видно только вошедшим юзерам
@@ -60,7 +59,7 @@ export default function Home() {
               )}
             </div>
           </SignedIn>
-          <Link href="creation/class">Create a Character</Link>
+          <Link href="creation">Create a Character</Link>
         </div>
       </main>
     </>

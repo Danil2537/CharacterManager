@@ -2,7 +2,7 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const creationRouter = createTRPCRouter({
   getAllClasses: publicProcedure.query(async ({ ctx }) => { 
-    const classes = await ctx.prisma.class.findMany();
+    const classes = await ctx.prisma.class.findMany({include: {feats:true, startingEquipment: true}});
     console.log("Fetched classes", JSON.stringify(classes, null, 2));
     return classes;
   }),
