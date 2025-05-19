@@ -1,7 +1,8 @@
-# Create T3 App
+# Character Manager
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+This is a wep-app project for creating and using D&D 5e (2024) characters
+Made by Danilo Diedov and Maxim Gorlov as a university coursework.
 
-- [ ] Create database schema in prisma
-- [ ] Create basic profile page and put the signIn button from clerk into it
-- [ ] Create a test trpc api route and try to connect to the db from backend
+TODO: figure something out with spell selection on char creation. It's hard :(
+TODO: maybe add background ability score increase to the ability score page in character creation
+TODO: choosing skill profs of the chosen class

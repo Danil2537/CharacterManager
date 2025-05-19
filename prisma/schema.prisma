@@ -140,7 +140,7 @@ enum SourceType {
 
 model Character {
     id    Int @id @default(autoincrement())
-    userID    Int
+    //userID    Int
     clerkUserId String @default("user_2wBqlT3HS86GneHIm0IGnAeuIVK")
     //user  User    @relation(fields: [userID], references: [id])
     speciesID Int?
@@ -305,6 +305,7 @@ model Class {
     grantsSpellcasting Boolean
     spellsList Spell[] 
     grantedSpells GrantedSpell[] @relation("ClassGrants")
+    //TODO: maaaybe add spell progression
 }
 
 
