@@ -1,15 +1,21 @@
+// src/pages/index.tsx
 import Head from "next/head";
-import Link from "next/link";
+//всё что находиться внутри signedOut будет видно только НЕ залогиненым юзерам
+//всё что находиться внутри signedIn будет видно только вошедшим юзерам
+//SignInButton - перекидывает юзера на страничку логина (страница логина создаётся автоматически сайтом clerk)
+//UserButton - перекидывает юзера в автоматически созданное меню настроек аккаунта
 import { SignedOut, SignedIn, SignInButton, UserButton } from "@clerk/nextjs";
-import { api } from "../utils/api";
+import { api, type RouterOutputs } from "../utils/api";
+import Link from "next/link";
+
+// Define the expected type for characters
+type Character = RouterOutputs["profile"]["getUserCharacters"][number];
 
 export default function Home() {
-  const { data: characters, isLoading, isError } = api.profile.getUserCharacters.useQuery(
-    undefined, // No input expected
-    {
-      enabled: typeof window !== "undefined", // Only run this query on client-side
-    }
-  );
+  const { data: characters, isLoading, isError } =
+    api.profile.getUserCharacters.useQuery(undefined, {
+      enabled: typeof window !== "undefined",
+    });
 
   return (
     <>
@@ -20,37 +26,41 @@ export default function Home() {
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-          </h1>
-
-          <SignedOut>
+          <SignedOut> 
             <SignInButton />
           </SignedOut>
 
           <SignedIn>
             <UserButton />
-<div className="mt-4 text-white">
-                <h2 className="text-2xl font-bold">Your Characters:</h2>
-                {isLoading && <p>Loading characters...</p>}
-                {isError && <p>Failed to load characters.</p>}
-                {characters?.length ? (
-                  <ul>
-                    {characters.map((character: any) => (
-                      <li key={character.id}>
-                        <strong>{character.name}</strong><br />
-                        Species: {character.species?.name || "Unknown"}<br />
-                        Background: {character.background?.name || "Unknown"}<br />
-                        Subclass: {character.subclass?.name || "None"}<br />
-                        Classes: {character.characterClasses?.map((cc: any) => cc.class?.name).join(", ") || "None"}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>No characters found.</p>
-                )}
-              </div>
+            <div className="mt-4 text-white">
+              <h2 className="text-2xl font-bold">Your Characters:</h2>
+              {isLoading && <p>Loading characters...</p>}
+              {isError && <p>Failed to load characters.</p>}
+              {characters?.length ? (
+                <ul>
+                  {characters.map((character: Character) => (
+                    <li key={character.id}>
+                      <strong>{character.name}</strong>
+                      <br />
+                      Species: {character.species?.name ?? "Unknown"}
+                      <br />
+                      Background: {character.background?.name ?? "Unknown"}
+                      <br />
+                      Subclass: {character.subclass?.name ?? "None"}
+                      <br />
+                      Classes:{" "}
+                      {character.characterClasses
+                        ?.map((cc) => cc.class?.name ?? "Unknown")
+                        .join(", ") ?? "None"}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No characters found.</p>
+              )}
+            </div>
           </SignedIn>
+          <Link href="creation/class">Create a Character</Link>
         </div>
       </main>
     </>

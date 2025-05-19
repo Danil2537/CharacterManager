@@ -28,7 +28,7 @@ export const profileRouter = createTRPCRouter({
                 }
             }) ?? [];
 
-            console.log("Fetched characters with full details:", JSON.stringify(characters, null, 2)); // Log all fields with related data
+            console.log("Fetched characters with full details:", JSON.stringify(characters, null, 2));
 
             return characters;
         } else {
