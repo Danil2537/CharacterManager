@@ -127,14 +127,7 @@ useEffect(() => {
         chosenClassId: selectedClass,
         chosenSpeciesId: selectedSpecies,
         chosenBackgroundId: selectedBackground,
-        abilityScores: [
-          scores.strength,
-          scores.dexterity,
-          scores.constitution,
-          scores.intelligence,
-          scores.wisdom,
-          scores.charisma,
-        ],
+        abilityScores: scores,
         chosenEquipmentIds: selectedEquipment,
       };
 
