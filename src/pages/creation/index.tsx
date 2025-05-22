@@ -1,9 +1,8 @@
 "use client"
 import Head from "next/head";
-import Link from "next/link";
 import { useState, createContext, useContext, type ReactNode, useEffect } from "react";
 import { api, type RouterOutputs } from "../../utils/api";
-import { Language, Skill } from "@prisma/client";
+import { Language, type Skill } from "@prisma/client";
 import { useRouter } from "next/navigation";
 type CharacterClass = RouterOutputs["creation"]["getAllClasses"][number];
 type Species = RouterOutputs["creation"]["getAllSpecies"][number];
@@ -66,7 +65,7 @@ function CharacterCreation() {
   const router = useRouter();
   const [languageChoices, setLanguageChoices] = useState<Language[]>([]);
   const [backgroundBoostMode, setBackgroundBoostMode] = useState<"threeOnes" | "twoAndOne" | null>(null);
-  const [abilityBoosts, setAbilityBoosts] = useState<{ [key: string]: number }>({});
+  const [abilityBoosts, setAbilityBoosts] = useState<Record<string, number>>({});
   const [step, setStep] = useState(0);
   const { data: classes } = api.creation.getAllClasses.useQuery();
   const { data: species } = api.creation.getAllSpecies.useQuery();
@@ -99,8 +98,8 @@ function CharacterCreation() {
 };
 
   useEffect(() => {
-  const classEquipment = selectedClass?.startingEquipment || [];
-  const backgroundEquipment = selectedBackground?.items || [];
+  const classEquipment = selectedClass?.startingEquipment ?? [];
+  const backgroundEquipment = selectedBackground?.items ?? [];
 
   const uniqueItems = Array.from(new Map(
     [...classEquipment, ...backgroundEquipment].map(item => [item.id, item])
@@ -160,8 +159,8 @@ const submitCharacterCreation = async () => {
       chosenBackgroundId: selectedBackground.id,
       abilityScores: finalAbilityScores,
       chosenEquipmentIds: selectedEquipment,
-      skillProfs: selectedSkills as Skill[],       
-      knownLanguages: languageChoices as Language[], 
+      skillProfs: selectedSkills,       
+      knownLanguages: languageChoices, 
     };
 
     console.log("Submitting character data:", data);
