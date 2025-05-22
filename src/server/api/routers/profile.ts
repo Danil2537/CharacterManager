@@ -210,7 +210,7 @@ exportCharacter: publicProcedure
         spellsPrepared: true,
       },
     });
-
+    
     if (!character) throw new Error("Character not found");
     return character;
   }),
@@ -221,12 +221,6 @@ importCharacter: publicProcedure
   .mutation(async ({ ctx, input }) => {
     const orig = input.characterData;
 
-    const newHitDice =
-        orig.hitDice ??
-        orig.classLevels.map((num: number, i: string | number) => ({
-        num: num ?? 1,
-        faces: orig.characterClasses?.[i]?.class?.hitDiceType ?? 6,
-        }));
 
     const currentUser = getAuth(ctx.req);
     if (!currentUser || !currentUser.userId) {
@@ -238,30 +232,30 @@ importCharacter: publicProcedure
 
     const character = await ctx.prisma.character.create({
         data: {
-        name: `${orig.name} (Imported)`,
+        name: orig?.name + "Imported",
         clerkUserId: currentUser.userId,
-        speciesID: orig.speciesID,
-        backgroundID: orig.backgroundID,
-        abilityScores: orig.abilityScores,
-        savingThrows: orig.savingThrows,
-        armorProfs: orig.armorProfs,
-        skillProfs: orig.skillProfs,
-        skillExpertices: orig.skillExpertices ?? [],
-        knownLanguage: orig.knownLanguage,
-        initiative: orig.initiative,
-        speed: orig.speed,
-        proficiencyBonus: orig.proficiencyBonus,
-        armorClass: orig.armorClass,
-        exhaustionLevel: orig.exhaustionLevel,
-        maxHitPoints: orig.maxHitPoints,
-        currentHitPoints: orig.currentHitPoints,
-        hitDice: newHitDice,
-        experience: orig.experience,
-        level: orig.level,
-        passivePerception: orig.passivePerception,
-        carryingCapacity: orig.carryingCapacity ?? 100,
-        alignment: orig.alignment,
-        classLevels: orig.classLevels,
+        speciesID: orig?.speciesID,
+        backgroundID: orig?.backgroundID,
+        abilityScores: orig?.abilityScores,
+        savingThrows: orig?.savingThrows,
+        armorProfs: orig?.armorProfs,
+        skillProfs: orig?.skillProfs,
+        skillExpertices: orig?.skillExpertices ?? [],
+        knownLanguage: orig?.knownLanguage,
+        initiative: orig?.initiative,
+        speed: orig?.speed,
+        proficiencyBonus: orig?.proficiencyBonus,
+        armorClass: orig?.armorClass,
+        exhaustionLevel: orig?.exhaustionLevel,
+        maxHitPoints: orig?.maxHitPoints,
+        currentHitPoints: orig?.currentHitPoints,
+        hitDice: orig?.HitDice ?? [{"num":1,"faces":8}],
+        experience: orig?.experience,
+        level: orig?.level,
+        passivePerception: orig?.passivePerception,
+        carryingCapacity: orig?.carryingCapacity ?? 100,
+        alignment: orig?.alignment,
+        classLevels: orig?.classLevels,
         },
     });
 

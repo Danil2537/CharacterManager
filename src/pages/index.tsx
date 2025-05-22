@@ -54,7 +54,7 @@ export default function Home() {
     const content = await file.text();
     const data = JSON.parse(content);
 
-    importCharacter.mutate(data);
+    importCharacter.mutate({characterData: data});
   };
 
   return (
