@@ -1,8 +1,8 @@
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import {z} from "zod";
+import {nativeEnum, z} from "zod";
 import { getAuth } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
-import { Alignment, Size } from "@prisma/client";
+import { Alignment, Size, Language, Skill } from "@prisma/client";
 
 export const creationRouter = createTRPCRouter({
   getAllClasses: publicProcedure.query(async ({ ctx }) => { 
@@ -23,9 +23,11 @@ export const creationRouter = createTRPCRouter({
     return backgrounds;
   }),
 
+
 createCharacter: publicProcedure
   .input(
     z.object({
+      chosenName: z.string(),
       chosenClassId: z.number(),
       chosenSpeciesId: z.number(),
       chosenBackgroundId: z.number(),
@@ -38,6 +40,9 @@ createCharacter: publicProcedure
         charisma: z.number(),
       }),
       chosenEquipmentIds: z.array(z.number()),
+      knownLanguages: z.array(z.nativeEnum(Language)),
+      skillProfs: z.array(z.nativeEnum(Skill)),
+      skillExpertices: z.array(z.nativeEnum(Skill)).optional(), // optional
     })
   )
   .mutation(async ({ ctx, input }) => {
@@ -63,7 +68,6 @@ createCharacter: publicProcedure
       });
     }
 
-    // Calculate carrying capacity
     let carryingCapacity;
     switch (chosenSpecies.size) {
       case "Tiny":
@@ -93,7 +97,7 @@ createCharacter: publicProcedure
 
     const character = await ctx.prisma.character.create({
       data: {
-        name: "default charname",
+        name: input.chosenName,
         clerkUserId: userId,
         speciesID: input.chosenSpeciesId,
         backgroundID: input.chosenBackgroundId,
@@ -107,6 +111,9 @@ createCharacter: publicProcedure
         ],
         savingThrows: chosenClass.saveProfs,
         armorProfs: chosenClass.armorTraining,
+        skillProfs: input.skillProfs,
+        skillExpertices: input.skillExpertices ?? [],
+        knownLanguage: input.knownLanguages,
         initiative: dexMod,
         speed: chosenSpecies.speed,
         proficiencyBonus: 2,
@@ -119,9 +126,8 @@ createCharacter: publicProcedure
         level: 1,
         passivePerception: 10 + wisMod,
         carryingCapacity: carryingCapacity,
-        alignment: Alignment.LawfulGood, // Default alignment — change if input is expected
-        classLevels: [1], // First class, level 1
-        // Optional: add spell-related defaults if chosenClass is a caster
+        alignment: Alignment.LawfulGood,
+        classLevels: [1],
       },
     });
 

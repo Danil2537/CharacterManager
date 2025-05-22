@@ -357,7 +357,7 @@ model Background {
     skillProfs Skill[] 
     items Item[]
     gold Int @default(50)
-    abillities Ability[] //size always 3
+    abilities Ability[] //size always 3
     toolProficiency Tool 
     grantedSpells GrantedSpell[] @relation("BackgroundGrants")
 }

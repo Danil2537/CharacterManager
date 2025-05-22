@@ -3,17 +3,21 @@ import Head from "next/head";
 import Link from "next/link";
 import { useState, createContext, useContext, type ReactNode, useEffect } from "react";
 import { api, type RouterOutputs } from "../../utils/api";
+import { Language, Skill } from "@prisma/client";
+import { useRouter } from "next/navigation";
+type CharacterClass = RouterOutputs["creation"]["getAllClasses"][number];
+type Species = RouterOutputs["creation"]["getAllSpecies"][number];
+type Background = RouterOutputs["creation"]["getAllBackgrounds"][number];
 
-// Character Creation Context
 type CharacterCreationContextType = {
-  selectedClass: number | null;
-  selectedSpecies: number | null;
-  selectedBackground: number | null;
+  selectedClass: CharacterClass | null;
+  selectedSpecies: Species | null;
+  selectedBackground: Background | null;
   abilityScores: number[] | null;
   selectedEquipment: number[];
-  setClass: (classObj: number) => void;
-  setSpecies: (speciesObj: number) => void;
-  setBackground: (backgroundObj: number) => void;
+  setClass: (classObj: CharacterClass) => void;
+  setSpecies: (speciesObj: Species) => void;
+  setBackground: (backgroundObj: Background) => void;
   setAbilityScores: (scores: number[]) => void;
   setEquipment: React.Dispatch<React.SetStateAction<number[]>>;
 };
@@ -21,10 +25,10 @@ type CharacterCreationContextType = {
 const CharacterCreationContext = createContext<CharacterCreationContextType | undefined>(undefined);
 
 export const CharacterCreationProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedClass, setSelectedClass] = useState(0);
-  const [selectedSpecies, setSelectedSpecies] = useState(0);
-  const [selectedBackground, setSelectedBackground] = useState(0);
-  const [abilityScores, setAbilityScores] = useState<number[] | null>([0,0,0,0,0,0]);
+  const [selectedClass, setSelectedClass] = useState<CharacterClass | null>(null);
+  const [selectedSpecies, setSelectedSpecies] = useState<Species | null>(null);
+  const [selectedBackground, setSelectedBackground] = useState<Background | null>(null);
+  const [abilityScores, setAbilityScores] = useState<number[] | null>([0, 0, 0, 0, 0, 0]);
   const [selectedEquipment, setSelectedEquipment] = useState<number[]>([]);
 
   return (
@@ -55,9 +59,14 @@ export default function CharacterCreationPage() {
   );
 }
 
+const allLanguages = Object.values(Language);
 
 
 function CharacterCreation() {
+  const router = useRouter();
+  const [languageChoices, setLanguageChoices] = useState<Language[]>([]);
+  const [backgroundBoostMode, setBackgroundBoostMode] = useState<"threeOnes" | "twoAndOne" | null>(null);
+  const [abilityBoosts, setAbilityBoosts] = useState<{ [key: string]: number }>({});
   const [step, setStep] = useState(0);
   const { data: classes } = api.creation.getAllClasses.useQuery();
   const { data: species } = api.creation.getAllSpecies.useQuery();
@@ -71,6 +80,15 @@ function CharacterCreation() {
     wisdom: 0,
     charisma: 0,
   });
+  const [selectedSkills, setSelectedSkills] = useState<Skill[]>([]);
+  const [characterName, setCharacterName] = useState<string>("");
+  const [availableEquipment, setAvailableEquipment] = useState<{ id: number; name: string }[]>([]);
+
+   const handleEquipmentToggle = (itemId: number) => {
+    setEquipment( (prev) => 
+      prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
+    );
+  };
   const { mutateAsync: createCharacter } = api.creation.createCharacter.useMutation();
 
   const roll4d6DropLowest = (): number => {
@@ -80,22 +98,23 @@ function CharacterCreation() {
   return rolls.slice(0, 3).reduce((sum, roll) => sum + roll, 0); // Sum of three highest
 };
 
-const [availableEquipment, setAvailableEquipment] = useState<{ id: number; name: string }[]>([]);
-useEffect(() => {
-    const classObj = classes?.find((cls) => cls.id === selectedClass);
-    const backgroundObj = backgrounds?.find((bg) => bg.id === selectedBackground);
+  useEffect(() => {
+  const classEquipment = selectedClass?.startingEquipment || [];
+  const backgroundEquipment = selectedBackground?.items || [];
 
-    const classEquipment = classObj?.startingEquipment || [];
-    const backgroundEquipment = backgroundObj?.items || [];
+  const uniqueItems = Array.from(new Map(
+    [...classEquipment, ...backgroundEquipment].map(item => [item.id, item])
+  ).values());
 
-    setAvailableEquipment([...classEquipment, ...backgroundEquipment]);
-  }, [selectedClass, selectedBackground, classes, backgrounds]);
+  setAvailableEquipment(uniqueItems);
+  }, [selectedClass, selectedBackground]);
 
-  const handleEquipmentToggle = (itemId: number) => {
-    setEquipment( (prev) => 
-      prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
-    );
-  };
+  useEffect(() => {
+  if (backgroundBoostMode === "threeOnes" && selectedBackground) {
+    const boosts = Object.fromEntries(selectedBackground.abilities.map(ab => [ab, 1]));
+    setAbilityBoosts(boosts);
+  }
+  }, [backgroundBoostMode, selectedBackground]);
 
   const nextStep = () => setStep((prev) => Math.min(prev + 1, 4));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 0));
@@ -104,41 +123,57 @@ useEffect(() => {
     setScores((prev) => ({ ...prev, [ability]: value }));
   };
 
-  // Handler for rolling a score
   const handleRoll = (ability: keyof typeof scores) => {
     const rolledValue = roll4d6DropLowest();
     setScores((prev) => ({ ...prev, [ability]: rolledValue }));
   };
 
-  const submitCharacterCreation = async () => {
-    try {
-      if (
-        selectedClass === null ||
-        selectedSpecies === null ||
-        selectedBackground === null ||
-        !scores ||
-        selectedEquipment.length === 0
-      ) {
-        alert("Please complete all steps before submitting.");
-        return;
-      }
-
-      const data = {
-        chosenClassId: selectedClass,
-        chosenSpeciesId: selectedSpecies,
-        chosenBackgroundId: selectedBackground,
-        abilityScores: scores,
-        chosenEquipmentIds: selectedEquipment,
-      };
-
-      console.log("Submitting character data:", data);
-      await createCharacter(data);
-      alert("Character created successfully!");
-    } catch (error) {
-      console.error("Failed to create character:", error);
-      alert("Failed to create character. Please try again.");
+const submitCharacterCreation = async () => {
+  try {
+    if (
+      !characterName.trim() ||
+      selectedClass === null ||
+      selectedSpecies === null ||
+      selectedBackground === null ||
+      !scores ||
+      selectedEquipment.length === 0 ||
+      selectedSkills.length !== selectedClass.skillProfsNum ||
+      languageChoices.length !== 2
+    ) {
+      alert("Please complete all steps before submitting.");
+      return;
     }
-  };
+
+    const finalAbilityScores = { ...scores };
+    for (const [ability, boost] of Object.entries(abilityBoosts)) {
+      const abilityKey = ability.toLowerCase() as keyof typeof scores;
+      console.log(`Score BEFORE background boost: ${finalAbilityScores[abilityKey]}`);
+      console.log(`Boosts: ${boost}`);
+      finalAbilityScores[abilityKey] += boost;
+      console.log(`Score AFTER background boost: ${finalAbilityScores[abilityKey]}`);
+    }
+
+    const data = {
+      chosenName: characterName.trim(),
+      chosenClassId: selectedClass.id,
+      chosenSpeciesId: selectedSpecies.id,
+      chosenBackgroundId: selectedBackground.id,
+      abilityScores: finalAbilityScores,
+      chosenEquipmentIds: selectedEquipment,
+      skillProfs: selectedSkills as Skill[],       
+      knownLanguages: languageChoices as Language[], 
+    };
+
+    console.log("Submitting character data:", data);
+    await createCharacter(data);
+    alert("Character created successfully!");
+    router.push("/");
+  } catch (error) {
+    console.error("Failed to create character:", error);
+    alert("Failed to create character. Please try again.");
+  }
+};
+
 
   return (
     <>
@@ -148,28 +183,62 @@ useEffect(() => {
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
           <h2 className="text-2xl font-bold text-white">Character Creation (Step {step + 1})</h2>
+          <button className="mt-4 px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600" onClick={() => router.push("/")}>
+          Back to Home
+          </button>
           {step === 0 && (
-            <div>
-              <h3 className="text-xl text-white">Choose Your Class:</h3>
-              <h4 className="text--xl text-blue-500">Your Selected Class is: {selectedClass}</h4>
-              <ul>
-                {classes?.map((classObj) => (
-                  <li key={classObj.id} className="mt-2">
-                    <button className="text-white" onClick={() => setClass(classObj.id)}>{classObj.name}</button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <div>
+            <h3 className="text-xl text-white">Choose Your Class:</h3>
+            <h4 className="text--xl text-blue-500">Your Selected Class is: {selectedClass?.name}</h4>
+            <ul>
+              {classes?.map((classObj) => (
+                <li key={classObj.id} className="mt-2">
+                  <button className="text-white" onClick={() => {
+                    setClass(classObj);
+                    setSelectedSkills([]); // reset on class change
+                  }}>{classObj.name}</button>
+                </li>
+              ))}
+            </ul>
+
+            {selectedClass && (
+              <>
+                <h5 className="mt-4 text-xl text-white">Choose {selectedClass.skillProfsNum} Skill Proficiencies</h5>
+                <ul className="text-white">
+                  {selectedClass.availableSkillProfs.map((skill) => (
+                    <li key={skill}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={selectedSkills.includes(skill)}
+                          onChange={() => {
+                            setSelectedSkills((prev) =>
+                              prev.includes(skill)
+                                ? prev.filter((s) => s !== skill)
+                                : prev.length < selectedClass.skillProfsNum
+                                ? [...prev, skill]
+                                : prev
+                            );
+                          }}
+                        />
+                        {skill}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+        )}
 
           {step === 1 && (
             <div>
               <h3 className="text-xl text-white">Choose Your Species:</h3>
-              <h4 className="text--xl text-blue-500">Your Selected Species is: {selectedSpecies}</h4>
+              <h4 className="text--xl text-blue-500">Your Selected Species is: {selectedSpecies?.name}</h4>
               <ul>
                 {species?.map((speciesObj) => (
                   <li key={speciesObj.id} className="mt-2">
-                    <button className="text-white" onClick={() => setSpecies(speciesObj.id)}>{speciesObj.name}</button>
+                    <button className="text-white" onClick={() => setSpecies(speciesObj)}>{speciesObj.name}</button>
                   </li>
                 ))}
               </ul>
@@ -177,18 +246,133 @@ useEffect(() => {
           )}
 
           {step === 2 && (
-            <div>
-              <h3 className="text-xl text-white">Choose Your Background:</h3>
-              <h4 className="text--xl text-blue-500">Your Selected Background is: {selectedBackground}</h4>
-              <ul>
-                {backgrounds?.map((backgroundObj) => (
-                  <li key={backgroundObj.id} className="mt-2">
-                    <button className="text-white" onClick={() => setBackground(backgroundObj.id)}>{backgroundObj.name}</button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <div className="text-white">
+          <div className="mt-4">
+            <label className="block text-lg">Character Name:</label>
+            <input
+              type="text"
+              value={characterName}
+              onChange={(e) => setCharacterName(e.target.value)}
+              className="text-black p-2 rounded w-full mt-1"
+              placeholder="Enter character name"
+            />
+          </div>
+            <h3 className="text-xl">Choose Your Background:</h3>
+            <h4 className="text--xl text-blue-500">Selected Background: {selectedBackground?.name}</h4>
+            <ul>
+              {backgrounds?.map((bg) => (
+                <li key={bg.id} className="mt-2">
+                  <button className="text-white" onClick={() => {
+                    setBackground(bg);
+                    setBackgroundBoostMode(null);
+                    setAbilityBoosts({});
+                    setLanguageChoices([]);
+                  }}>{bg.name}</button>
+                </li>
+              ))}
+            </ul>
+
+            {selectedBackground && (
+              <div className="mt-4">
+                <h4 className="text-lg">Boost Abilities:</h4>
+                <p>Abilities available to boost: {selectedBackground.abilities.join(", ")}</p>
+
+                {!backgroundBoostMode && (
+                  <>
+                    <button className="mr-2 mt-2 bg-blue-600 px-2 py-1 rounded" onClick={() => setBackgroundBoostMode("threeOnes")}>
+                      +1 to each of the three
+                    </button>
+                    <button className="mt-2 bg-blue-600 px-2 py-1 rounded" onClick={() => setBackgroundBoostMode("twoAndOne")}>
+                      +2 to one, +1 to another
+                    </button>
+                  </>
+                )}
+
+                {backgroundBoostMode === "threeOnes" && (
+                  <div className="mt-2">
+                    {selectedBackground.abilities.map((ab) => (
+                      <p key={ab}>{ab}: +1</p>
+                    ))}
+                  </div>
+                )}
+
+                {backgroundBoostMode === "twoAndOne" && (
+                <div className="mt-2">
+                  <label className="block mb-2">+2 to:</label>
+                  <select
+                    className="text-black p-1 mb-2"
+                    onChange={(e) => {
+                      const two = e.target.value;
+                      setAbilityBoosts((prev) => {
+                        const updated = { ...prev };
+                        if (two) updated[two] = 2;
+                        // Remove any old +2 boosts from other abilities
+                        for (const key of selectedBackground.abilities) {
+                          if (key !== two && updated[key] === 2) delete updated[key];
+                        }
+                        return updated;
+                      });
+                    }}
+                    value={Object.entries(abilityBoosts).find(([_, val]) => val === 2)?.[0] ?? ""}
+                  >
+                    <option value="">-- Select --</option>
+                    {selectedBackground.abilities.map((ab) => (
+                      <option key={ab} value={ab}>{ab}</option>
+                    ))}
+                  </select>
+
+                  <label className="block mb-2">+1 to:</label>
+                  <select
+                    className="text-black p-1"
+                    onChange={(e) => {
+                      const one = e.target.value;
+                      setAbilityBoosts((prev) => {
+                        const updated = { ...prev };
+                        if (one) updated[one] = 1;
+                        // Remove any old +1 boosts from other abilities
+                        for (const key of selectedBackground.abilities) {
+                          if (key !== one && updated[key] === 1) delete updated[key];
+                        }
+                        return updated;
+                      });
+                    }}
+                    value={Object.entries(abilityBoosts).find(([_, val]) => val === 1)?.[0] ?? ""}
+                  >
+                    <option value="">-- Select --</option>
+                    {selectedBackground.abilities
+                      .filter((ab) => ab !== Object.entries(abilityBoosts).find(([_, val]) => val === 2)?.[0]) // exclude +2 ability
+                      .map((ab) => (
+                        <option key={ab} value={ab}>{ab}</option>
+                      ))}
+                  </select>
+                </div>
+              )}
+                              <h4 className="mt-4 text-lg">Choose 2 Languages:</h4>
+                <ul>
+                  {allLanguages.map((lang) => (
+                    <li key={lang}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={languageChoices.includes(lang)}
+                          disabled={!languageChoices.includes(lang) && languageChoices.length >= 2}
+                          onChange={() => {
+                            setLanguageChoices((prev) =>
+                              prev.includes(lang)
+                                ? prev.filter((l) => l !== lang)
+                                : [...prev, lang]
+                            );
+                          }}
+                        />
+                        {lang}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
           {step === 3 && (
             <div className="flex flex-col items-center gap-4 text-white">
       <h2 className="text-2xl font-bold">Choose Your Ability Scores:</h2>
