@@ -2,6 +2,50 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { getAuth } from "@clerk/nextjs/server";
 import type { IncomingMessage } from "http";
+import { TRPCError } from "@trpc/server";
+import {WeaponProperty} from "@prisma/client"
+const characterDataSchema = z.object({
+  name: z.string(),
+  clerkUserId: z.string().optional(),
+  speciesID: z.number(),
+  backgroundID: z.number(),
+  abilityScores: z.array(z.number()),
+  savingThrows: z.array(z.boolean()),
+  armorProfs: z.array(z.string()),
+  skillProfs: z.array(z.string()),
+  skillExpertices: z.array(z.string()).optional(),
+  knownLanguage: z.array(z.string()),
+  initiative: z.number(),
+  speed: z.number(),
+  proficiencyBonus: z.number(),
+  armorClass: z.number(),
+  exhaustionLevel: z.number(),
+  maxHitPoints: z.number(),
+  currentHitPoints: z.number(),
+  hitDice: z
+    .array(z.object({ num: z.number(), faces: z.number() }))
+    .optional(),
+  experience: z.number(),
+  level: z.number(),
+  passivePerception: z.number(),
+  carryingCapacity: z.number().optional(),
+  alignment: z.string(),
+  classLevels: z.array(z.number()),
+  characterClasses: z
+    .array(z.object({ class: z.object({ id: z.number(), hitDiceType: z.number().optional() }) }))
+    .optional(),
+  characterItems: z
+    .array(z.object({ item: z.object({ id: z.number() }) }))
+    .optional(),
+  weaponProficiencies: z
+    .array(
+      z.object({
+        weaponId: z.number().nullable().optional(),
+        property: z.string().nullable().optional(),
+      }),
+    )
+    .optional(),
+});
 
 export const profileRouter = createTRPCRouter({
     getUserCharacters: publicProcedure.query(async ({ ctx }) => {
@@ -144,16 +188,22 @@ cloneCharacter: publicProcedure
 
 exportCharacter: publicProcedure
   .input(z.object({ charId: z.number() }))
-  .query(async ({ ctx, input }) => {
+  .mutation(async ({ ctx, input }) => {
     const character = await ctx.prisma.character.findFirst({
       where: { id: input.charId },
       include: {
         species: true,
         background: true,
         subclass: true,
-        characterClasses: { include: { class: true } },
-        characterItems: { include: { item: true } },
-        weaponProficiencies: { include: { weapon: true } },
+        characterClasses: {
+          include: { class: true },
+        },
+        characterItems: {
+          include: { item: true },
+        },
+        weaponProficiencies: {
+          include: { weapon: true },
+        },
         feats: true,
         attacks: true,
         spellsKnown: true,
@@ -162,7 +212,6 @@ exportCharacter: publicProcedure
     });
 
     if (!character) throw new Error("Character not found");
-
     return character;
   }),
 
@@ -172,17 +221,25 @@ importCharacter: publicProcedure
   .mutation(async ({ ctx, input }) => {
     const orig = input.characterData;
 
-    if (!orig) throw new Error("No character data provided");
+    const newHitDice =
+        orig.hitDice ??
+        orig.classLevels.map((num: number, i: string | number) => ({
+        num: num ?? 1,
+        faces: orig.characterClasses?.[i]?.class?.hitDiceType ?? 6,
+        }));
 
-    const newHitDice = orig.hitDice ?? orig.classLevels?.map((num: any, i: string | number) => ({
-      num: num ?? 1,
-      faces: orig.characterClasses[i]?.class?.hitDiceType ?? 6,
-    }));
+    const currentUser = getAuth(ctx.req);
+    if (!currentUser || !currentUser.userId) {
+        throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "You must be logged in to import a character.",
+        });
+    }
 
     const character = await ctx.prisma.character.create({
-      data: {
-        name: orig.name + " (Imported)",
-        clerkUserId: orig.clerkUserId,
+        data: {
+        name: `${orig.name} (Imported)`,
+        clerkUserId: currentUser.userId,
         speciesID: orig.speciesID,
         backgroundID: orig.backgroundID,
         abilityScores: orig.abilityScores,
@@ -202,44 +259,45 @@ importCharacter: publicProcedure
         experience: orig.experience,
         level: orig.level,
         passivePerception: orig.passivePerception,
-        carryingCapacity: orig.carryingCapacity,
+        carryingCapacity: orig.carryingCapacity ?? 100,
         alignment: orig.alignment,
         classLevels: orig.classLevels,
-      },
+        },
     });
 
     if (orig.characterClasses) {
-      await ctx.prisma.characterClasses.createMany({
-        data: orig.characterClasses.map((cc: { class: { id: any; }; }) => ({
-          characterId: character.id,
-          classId: cc.class.id,
+        await ctx.prisma.characterClasses.createMany({
+        data: orig.characterClasses.map((cc: { class: { id: number; }; }) => ({
+            characterId: character.id,
+            classId: cc.class.id,
         })),
-      });
+        });
     }
 
     if (orig.characterItems) {
-      await ctx.prisma.characterItems.createMany({
-        data: orig.characterItems.map((ci: { item: { id: any; }; }) => ({
-          characterId: character.id,
-          itemId: ci.item.id,
+        await ctx.prisma.characterItems.createMany({
+        data: orig.characterItems.map((ci: { item: { id: number; }; }) => ({
+            characterId: character.id,
+            itemId: ci.item.id,
         })),
         skipDuplicates: true,
-      });
+        });
     }
 
     if (orig.weaponProficiencies) {
-      await ctx.prisma.characterWeaponProficiency.createMany({
-        data: orig.weaponProficiencies.map((wp: { weaponId: any; property: any; }) => ({
-          characterId: character.id,
-          weaponId: wp.weaponId ?? null,
-          property: wp.property ?? null,
+        await ctx.prisma.characterWeaponProficiency.createMany({
+        data: orig.weaponProficiencies.map((wp: { weaponId: number; property: WeaponProperty; }) => ({
+            characterId: character.id,
+            weaponId: wp.weaponId ?? null,
+            property: wp.property ?? null,
         })),
         skipDuplicates: true,
-      });
+        });
     }
 
     return character;
-  }),
+    }),
+
 
   deleteCharacter: publicProcedure.input(z.object({id: z.number()}))
    .mutation(async ({ ctx, input }) => {
