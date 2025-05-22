@@ -37,4 +37,213 @@ export const profileRouter = createTRPCRouter({
             );
         }
     }),
+
+cloneCharacter: publicProcedure
+  .input(z.object({ charId: z.number() }))
+  .mutation(async ({ ctx, input }) => {
+    const orig = await ctx.prisma.character.findFirst({
+      where: { id: input.charId },
+      include: {
+        species: true,
+        background: true,
+        subclass: true,
+        characterClasses: {
+          include: { class: true },
+        },
+        characterItems: {
+          include: { item: true },
+        },
+        weaponProficiencies: {
+          include: { weapon: true },
+        },
+        feats: true,
+        attacks: true,
+        spellsKnown: true,
+        spellsPrepared: true,
+      },
+    });
+
+    if (!orig) throw new Error("Original character not found");
+
+    let newHitDice = orig.hitDice;
+    if (!newHitDice && orig.classLevels && orig.characterClasses) {
+      newHitDice = orig.classLevels.map((num, i) => ({
+        num: num ?? 1,
+        faces: orig.characterClasses[i]?.class?.hitDiceType ?? 6,
+      }));
+    }
+
+    const character = await ctx.prisma.character.create({
+      data: {
+        name: orig.name + " (Clone)",
+        clerkUserId: orig.clerkUserId,
+        speciesID: orig.speciesID,
+        backgroundID: orig.backgroundID,
+        abilityScores: [
+          orig.abilityScores[0] ?? 10,
+          orig.abilityScores[1] ?? 10,
+          orig.abilityScores[2] ?? 10,
+          orig.abilityScores[3] ?? 10,
+          orig.abilityScores[4] ?? 10,
+          orig.abilityScores[5] ?? 10,
+        ],
+        savingThrows: orig.savingThrows,
+        armorProfs: orig.armorProfs,
+        skillProfs: orig.skillProfs,
+        skillExpertices: orig.skillExpertices ?? [],
+        knownLanguage: orig.knownLanguage,
+        initiative: orig.initiative,
+        speed: orig.speed,
+        proficiencyBonus: orig.proficiencyBonus,
+        armorClass: orig.armorClass,
+        exhaustionLevel: orig.exhaustionLevel,
+        maxHitPoints: orig.maxHitPoints,
+        currentHitPoints: orig.currentHitPoints,
+        hitDice: orig?.hitDice??orig.classLevels.map((num, i) => ({num: num ?? 1, faces: orig.characterClasses[i]?.class?.hitDiceType ?? 6,})),
+        experience: orig.experience,
+        level: orig.level,
+        passivePerception: orig.passivePerception ?? Math.floor(((orig.abilityScores[4] ?? 10) - 10) / 2) + 10,
+        carryingCapacity: orig.carryingCapacity ?? 100,
+        alignment: orig.alignment,
+        classLevels: orig.classLevels,
+      },
+    });
+
+    if (orig.characterClasses) {
+      await ctx.prisma.characterClasses.createMany({
+        data: orig.characterClasses.map((cc) => ({
+          characterId: character.id,
+          classId: cc.class.id,
+        })),
+      });
+    }
+
+    if (orig.characterItems) {
+      await ctx.prisma.characterItems.createMany({
+        data: orig.characterItems.map((ci) => ({
+          characterId: character.id,
+          itemId: ci.item.id,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    if (orig.weaponProficiencies) {
+      await ctx.prisma.characterWeaponProficiency.createMany({
+        data: orig.weaponProficiencies.map((wp) => ({
+          characterId: character.id,
+          weaponId: wp.weaponId ?? null,
+          property: wp.property ?? null,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    return character;
+  }),
+
+exportCharacter: publicProcedure
+  .input(z.object({ charId: z.number() }))
+  .query(async ({ ctx, input }) => {
+    const character = await ctx.prisma.character.findFirst({
+      where: { id: input.charId },
+      include: {
+        species: true,
+        background: true,
+        subclass: true,
+        characterClasses: { include: { class: true } },
+        characterItems: { include: { item: true } },
+        weaponProficiencies: { include: { weapon: true } },
+        feats: true,
+        attacks: true,
+        spellsKnown: true,
+        spellsPrepared: true,
+      },
+    });
+
+    if (!character) throw new Error("Character not found");
+
+    return character;
+  }),
+
+
+importCharacter: publicProcedure
+  .input(z.object({ characterData: z.any() }))
+  .mutation(async ({ ctx, input }) => {
+    const orig = input.characterData;
+
+    if (!orig) throw new Error("No character data provided");
+
+    const newHitDice = orig.hitDice ?? orig.classLevels?.map((num: any, i: string | number) => ({
+      num: num ?? 1,
+      faces: orig.characterClasses[i]?.class?.hitDiceType ?? 6,
+    }));
+
+    const character = await ctx.prisma.character.create({
+      data: {
+        name: orig.name + " (Imported)",
+        clerkUserId: orig.clerkUserId,
+        speciesID: orig.speciesID,
+        backgroundID: orig.backgroundID,
+        abilityScores: orig.abilityScores,
+        savingThrows: orig.savingThrows,
+        armorProfs: orig.armorProfs,
+        skillProfs: orig.skillProfs,
+        skillExpertices: orig.skillExpertices ?? [],
+        knownLanguage: orig.knownLanguage,
+        initiative: orig.initiative,
+        speed: orig.speed,
+        proficiencyBonus: orig.proficiencyBonus,
+        armorClass: orig.armorClass,
+        exhaustionLevel: orig.exhaustionLevel,
+        maxHitPoints: orig.maxHitPoints,
+        currentHitPoints: orig.currentHitPoints,
+        hitDice: newHitDice,
+        experience: orig.experience,
+        level: orig.level,
+        passivePerception: orig.passivePerception,
+        carryingCapacity: orig.carryingCapacity,
+        alignment: orig.alignment,
+        classLevels: orig.classLevels,
+      },
+    });
+
+    if (orig.characterClasses) {
+      await ctx.prisma.characterClasses.createMany({
+        data: orig.characterClasses.map((cc: { class: { id: any; }; }) => ({
+          characterId: character.id,
+          classId: cc.class.id,
+        })),
+      });
+    }
+
+    if (orig.characterItems) {
+      await ctx.prisma.characterItems.createMany({
+        data: orig.characterItems.map((ci: { item: { id: any; }; }) => ({
+          characterId: character.id,
+          itemId: ci.item.id,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    if (orig.weaponProficiencies) {
+      await ctx.prisma.characterWeaponProficiency.createMany({
+        data: orig.weaponProficiencies.map((wp: { weaponId: any; property: any; }) => ({
+          characterId: character.id,
+          weaponId: wp.weaponId ?? null,
+          property: wp.property ?? null,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    return character;
+  }),
+
+  deleteCharacter: publicProcedure.input(z.object({id: z.number()}))
+   .mutation(async ({ ctx, input }) => {
+    return ctx.prisma.character.delete({where: {id: input.id}});
+   }),
+
 });
