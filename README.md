@@ -7,3 +7,5 @@ TODO: figure something out with spell selection on char creation. It's hard :( (
 TODO: create interactive character sheet
 TODO: creating attacks on char creation
 TODO: export to PDF
+TODO: make classic sheet a separate db model
+TODO: add available spells query, based on slot levels

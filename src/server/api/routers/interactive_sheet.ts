@@ -12,7 +12,7 @@ export const interactiveSheetRouter = createTRPCRouter({
       include: {
         species: true,
         background: true,
-        subclass: true,
+        //subclass: true,
         characterClasses: {
           include: { class: true },
         },

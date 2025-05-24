@@ -87,7 +87,7 @@ export default function Home() {
                       <div>
                         Species: {character.species?.name ?? "Unknown"} <br />
                         Background: {character.background?.name ?? "Unknown"} <br />
-                        Subclass: {character.subclass?.name ?? "None"} <br />
+                        {/* Subclass: {character.subclass?.name ?? "None"} <br /> */}
                         Classes:{" "}
                         {character.characterClasses
                           ?.map((cc) => cc.class?.name ?? "Unknown")

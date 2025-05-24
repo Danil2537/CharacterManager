@@ -21,7 +21,7 @@ export const profileRouter = createTRPCRouter({
                 include: {
                     species: true,
                     background: true,
-                    subclass: true,
+                    //subclass: true,
                     characterClasses: {
                         include: {
                             class: true
@@ -48,7 +48,7 @@ cloneCharacter: publicProcedure
       include: {
         species: true,
         background: true,
-        subclass: true,
+        //subclass: true,
         characterClasses: {
           include: { class: true },
         },
@@ -152,7 +152,7 @@ exportCharacter: publicProcedure
       include: {
         species: true,
         background: true,
-        subclass: true,
+        //subclass: true,
         characterClasses: {
           include: { class: true },
         },

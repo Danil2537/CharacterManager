@@ -132,15 +132,15 @@ enum Tool {
 enum SourceType {
   CLASS
   SPECIES
-  SUBCLASS
+//   SUBCLASS
   BACKGROUND
   FEAT
 }
 
 enum SpellcastingType {
-    Arcane
-    Divine
-    Innate
+    Arcane //known!=prepared, known NOT depends on level, change prepared on long rest
+    Divine //know all spells from class list, prepared=table, change on long rest
+    Innate //known==prepared, but change only on lvl-up, prepared=table
 }
 
 
@@ -225,11 +225,11 @@ model Character {
     //classLevels will contain how many levels in each class character has. 
     //The sum of this array should go into Level field
     classLevels Int[] @default([1])
-    //When reaching level 3 for a class (which can happen several times if multiclassed)
-    //player chooses one of available subclasses for the class;
-    //subclasses grant unique features, on certain levels
-    subclassID    Int?
-    subclass  Subclass? @relation("CharacterSubclass", fields: [subclassID], references: [id])
+    // //When reaching level 3 for a class (which can happen several times if multiclassed)
+    // //player chooses one of available subclasses for the class;
+    // //subclasses grant unique features, on certain levels
+    // subclassID    Int?
+    // subclass  Subclass? @relation("CharacterSubclass", fields: [subclassID], references: [id])
     alignment Alignment @default(LawfulGood) //This is the "lawful good", "chaotic neutral" etc thing; Doesn't really have mechanical impact;
     characterItems CharacterItems[]
     passivePerception Int //Passive Perception = 10 + Wisdom (Perception) check modifier
@@ -244,7 +244,7 @@ model Character {
     //example: currentSpellSlots=[4,3,2] means 4 lvl1 spells, 3 lvl2 spells and 2 lvl 3 spells
     currentSpellSlots Int[] //By Spell Level
     spellSlots Int[] //same as above
-    spellsPreparedNum Int[]//how many spells of each level character can prepare
+    spellsPreparedNum Int?//how many spells character can prepare
     knownCantripsNum Int? //how many cantrips character "knows". Cantrips are lvl0 spells, that don't require spell slots to use
     spellsKnownNum Int? //todo: check if some classes differentiate known spells by level. afaik, this field only really matters for wizards, and they just "know" certain number with any level configuration
     spellsKnown Spell[] @relation(name: "spellsKnown") //for bards and sorcerers and such, this is spells learned on lvl-ups. For clerics and such, this contains full spell list of their class (and above spellsKnownNum therefore = class spell List size)
@@ -294,12 +294,35 @@ model Class {
     multiclassRequirement String //example: to multiclass into a wizard, you need at least 13 intelligence (wizard's primary ability) score
     startingEquipment Item[] //player can choose to take or not each individual item in this list. Should make checkbox in ui
     startingGold Int 
-    subclasses Subclass[]
+    //subclasses Subclass[]
     grantsSpellcasting Boolean
     spellcastingType SpellcastingType?
     spellsList Spell[] 
     grantedSpells GrantedSpell[] @relation("ClassGrants")
-    //TODO: maaaybe add spell progression
+    knownCantripsNum Int[] //how many cantrips character "knows". Cantrips are lvl0 spells, that don't require spell slots to use
+    //example spell slots for cleric: spellSlots: 
+    // [[2,0,0,0,0,0,0,0,0],
+    // [3,0,0,0,0,0,0,0,0],
+    // [4,2,0,0,0,0,0,0,0],
+    // [4,3,0,0,0,0,0,0,0],
+    // [4,3,2,0,0,0,0,0,0],
+    // [4,3,3,0,0,0,0,0,0],
+    // [4,3,3,1,0,0,0,0,0],
+    // [4,3,3,2,0,0,0,0,0],
+    // [4,3,3,3,1,0,0,0,0],
+    // [4,3,3,3,2,0,0,0,0],
+    // [4,3,3,3,2,1,0,0,0],
+    // [4,3,3,3,2,1,0,0,0],
+    // [4,3,3,3,2,1,1,0,0],
+    // [4,3,3,3,2,1,1,0,0],
+    // [4,3,3,3,2,1,1,1,0],
+    // [4,3,3,3,2,1,1,1,0],
+    // [4,3,3,3,2,1,1,1,1],
+    // [4,3,3,3,3,1,1,1,1],
+    // [4,3,3,3,3,2,1,1,1],
+    // [4,3,3,3,3,2,2,1,1]]
+    spellSlots Json? 
+    spellsPrepared Int[]
 }
 
 model CharacterClasses {
@@ -326,15 +349,15 @@ model Species {
 }
 
 
-model Subclass {
-    id        Int     @id @default(autoincrement())
-    name      String  @unique
-    characters Character[] @relation("CharacterSubclass")
-    feats Feat[]
-    Class Class[]
-    grantsSpellcasting Boolean //TODO: check if this system would work with arcane tricksters and other subclasses, that add spellcasting to character
-    grantedSpells GrantedSpell[] @relation("SubclassGrants")
-}
+// model Subclass {
+//     id        Int     @id @default(autoincrement())
+//     name      String  @unique
+//     characters Character[] @relation("CharacterSubclass")
+//     feats Feat[]
+//     Class Class[]
+//     grantsSpellcasting Boolean //TODO: check if this system would work with arcane tricksters and other subclasses, that add spellcasting to character
+//     grantedSpells GrantedSpell[] @relation("SubclassGrants")
+// }
 //A background includes the following parts. PHB 2024, page 177
 // Ability Scores. A background lists three of your character's ability scores. Increase one by 2 and another one by 1, or increase all three by 1. None of these increases can raise a score above 20.
 // Feat. A background gives your character a specified Origin feat (described in chapter 5).
@@ -365,7 +388,7 @@ model Feat {
     gainedAtLevel  Int? 
     classes      Class[]   
     species      Species[]  
-    subclasses   Subclass[] 
+    //subclasses   Subclass[] 
     background   Background? @relation("BackgroundFeat", fields: [backgroundId], references: [id])
     backgroundId Int?
     characters   Character[]
@@ -389,7 +412,7 @@ model GrantedSpell {
   Class Class[] @relation("ClassGrants")
   Spell Spell[] @relation("SpellGrants")
   Species Species[] @relation("SpeciesGrants")
-  Subclass Subclass[] @relation("SubclassGrants")
+  //Subclass Subclass[] @relation("SubclassGrants")
   Background Background[] @relation("BackgroundGrants")
   Feat Feat[] @relation("FeatGrants")
 }
