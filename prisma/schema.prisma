@@ -137,6 +137,12 @@ enum SourceType {
   FEAT
 }
 
+enum SpellcastingType {
+    Arcane
+    Divine
+    Innate
+}
+
 
 model Character {
     id    Int @id @default(autoincrement())
@@ -261,19 +267,6 @@ model Attack {
     Character Character[]
 }
 
-// model Weapon {
-//     id               Int    @id @default(autoincrement())
-//     name             String @unique
-//     cost             Int?
-//     weight           Int?
-//     damageDice Json //example: {"num": 1, "type": 6},
-//     damageType       String
-//     minRange         Int?  // Only for ranged/thrown weapons
-//     maxRange         Int? 
-//     properties       WeaponProperty[] 
-//     characterWeaponProficiency CharacterWeaponProficiency[]
-// }
-
 model CharacterWeaponProficiency {
     id          Int    @id @default(autoincrement())
     characterId Int
@@ -303,11 +296,11 @@ model Class {
     startingGold Int 
     subclasses Subclass[]
     grantsSpellcasting Boolean
+    spellcastingType SpellcastingType?
     spellsList Spell[] 
     grantedSpells GrantedSpell[] @relation("ClassGrants")
     //TODO: maaaybe add spell progression
 }
-
 
 model CharacterClasses {
     @@id([characterId, classId])

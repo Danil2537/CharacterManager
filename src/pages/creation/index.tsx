@@ -110,7 +110,7 @@ function CharacterCreation() {
 
   useEffect(() => {
   if (backgroundBoostMode === "threeOnes" && selectedBackground) {
-    const boosts = Object.fromEntries(selectedBackground.abilities.map(ab => [ab, 1]));
+    const boosts = Object.fromEntries(selectedBackground.abilities.map((ab: any) => [ab, 1]));
     setAbilityBoosts(boosts);
   }
   }, [backgroundBoostMode, selectedBackground]);

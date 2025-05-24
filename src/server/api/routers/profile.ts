@@ -4,48 +4,6 @@ import { getAuth } from "@clerk/nextjs/server";
 import type { IncomingMessage } from "http";
 import { TRPCError } from "@trpc/server";
 import {WeaponProperty} from "@prisma/client"
-const characterDataSchema = z.object({
-  name: z.string(),
-  clerkUserId: z.string().optional(),
-  speciesID: z.number(),
-  backgroundID: z.number(),
-  abilityScores: z.array(z.number()),
-  savingThrows: z.array(z.boolean()),
-  armorProfs: z.array(z.string()),
-  skillProfs: z.array(z.string()),
-  skillExpertices: z.array(z.string()).optional(),
-  knownLanguage: z.array(z.string()),
-  initiative: z.number(),
-  speed: z.number(),
-  proficiencyBonus: z.number(),
-  armorClass: z.number(),
-  exhaustionLevel: z.number(),
-  maxHitPoints: z.number(),
-  currentHitPoints: z.number(),
-  hitDice: z
-    .array(z.object({ num: z.number(), faces: z.number() }))
-    .optional(),
-  experience: z.number(),
-  level: z.number(),
-  passivePerception: z.number(),
-  carryingCapacity: z.number().optional(),
-  alignment: z.string(),
-  classLevels: z.array(z.number()),
-  characterClasses: z
-    .array(z.object({ class: z.object({ id: z.number(), hitDiceType: z.number().optional() }) }))
-    .optional(),
-  characterItems: z
-    .array(z.object({ item: z.object({ id: z.number() }) }))
-    .optional(),
-  weaponProficiencies: z
-    .array(
-      z.object({
-        weaponId: z.number().nullable().optional(),
-        property: z.string().nullable().optional(),
-      }),
-    )
-    .optional(),
-});
 
 export const profileRouter = createTRPCRouter({
     getUserCharacters: publicProcedure.query(async ({ ctx }) => {

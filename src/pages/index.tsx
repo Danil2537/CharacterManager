@@ -112,6 +112,11 @@ export default function Home() {
                         >
                           Export
                         </button>
+                        <Link
+                          href={`/interactivesheet?charId=${character.id}`}
+                          className="bg-green-600 px-3 py-1 rounded inline-block">
+                          View Sheet
+                        </Link>
                       </div>
                     </li>
                   ))}
