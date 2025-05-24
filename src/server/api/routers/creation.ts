@@ -102,6 +102,64 @@ createCharacter: publicProcedure
     const conMod = Math.floor((input.abilityScores.constitution - 10) / 2);
     const wisMod = Math.floor((input.abilityScores.wisdom - 10) / 2);
 
+
+    let spellAbility: Ability | undefined;
+    let spellSlots: number[] = [];
+    let currentSpellSlots: number[] = [];
+    let spellSaveDC: number | undefined;
+    let spellsPreparedNum: number | undefined;
+    let spellsKnownNum: number | undefined;
+    let knownCantripsNum: number | undefined;
+
+    if (chosenClass.grantsSpellcasting) {
+      spellAbility = chosenClass.primaryAbility;
+
+      if (chosenClass.spellSlots) {
+        const spellSlotsMatrix = chosenClass.spellSlots as number[][];
+        spellSlots = spellSlotsMatrix[0] ?? [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        currentSpellSlots = [...spellSlots];
+
+        const spellAbilityIndex = abilityIndexMap[spellAbility];
+        const spellAbilityScore = [
+          input.abilityScores.strength,
+          input.abilityScores.dexterity,
+          input.abilityScores.constitution,
+          input.abilityScores.intelligence,
+          input.abilityScores.wisdom,
+          input.abilityScores.charisma,
+        ][spellAbilityIndex] ?? 0;
+
+        spellSaveDC = 8 + ((spellAbilityScore-10)/2) + 2;
+        spellsPreparedNum = chosenClass.spellsPrepared?.[0] ?? 0;
+
+        const highestSpellLevel = spellSlots.reduceRight((acc, val, idx) =>
+          acc === -1 && val > 0 ? idx : acc, -1
+        );
+
+        const availableSpells = chosenClass.spellsList.filter(
+          (spell) => spell.level <= highestSpellLevel
+        );
+
+        switch (chosenClass.spellcastingType) {
+          case SpellcastingType.Arcane:
+            spellsKnownNum = spellsPreparedNum + 2;
+            break;
+          case SpellcastingType.Divine:
+            spellsKnownNum = availableSpells.length;
+            break;
+          case SpellcastingType.Innate:
+          default:
+            spellsKnownNum = spellsPreparedNum;
+            break;
+        }
+
+        knownCantripsNum = chosenClass.knownCantripsNum?.[0] ?? 0;
+      }
+    }
+
+
+
+
     const character = await ctx.prisma.character.create({
       data: {
         name: input.chosenName,
@@ -135,45 +193,17 @@ createCharacter: publicProcedure
         carryingCapacity: carryingCapacity,
         alignment: Alignment.LawfulGood,
         classLevels: [1],
+
+        spellAbility,
+        spellSlots,
+        currentSpellSlots,
+        spellSaveDC,
+        spellsPreparedNum,
+        spellsKnownNum,
+        knownCantripsNum,
       },
     });
-    if(chosenClass.grantsSpellcasting)
-    {
-      character.spellAbility = chosenClass.primaryAbility;
-      if(chosenClass.spellSlots)
-      {
-        const spellSlotsMatrix = chosenClass.spellSlots as number[][];
-        character.spellSlots = spellSlotsMatrix[character.level] ??[0,0,0,0,0,0,0,0,0];
-        character.currentSpellSlots = character.spellSlots;
-        if (character.spellAbility !== undefined && character.spellAbility !== null) {
-          const spellAbilityIndex = abilityIndexMap[character.spellAbility];
-          const spellAbilityScore = character.abilityScores[spellAbilityIndex] ?? 0;
-          const proficiencyBonus = character.proficiencyBonus ?? 2;
-          character.spellSaveDC = 8 + spellAbilityScore + proficiencyBonus;
-        }
-        character.spellsPreparedNum = chosenClass.spellsPrepared[0]??0;
-        const highestSpellLevel = character.spellSlots.reduceRight((acc, val, idx) => {
-          return acc === -1 && val > 0 ? idx : acc;
-        }, -1);
-        const availableSpells = chosenClass.spellsList.filter(spell => spell.level <= highestSpellLevel);
-        switch(chosenClass.spellcastingType)
-        {
-          case SpellcastingType.Arcane:
-            character.spellsKnownNum = character.spellsPreparedNum+2;
-            break;
-          case SpellcastingType.Divine:
-            
-            character.spellsKnownNum = availableSpells?.length ?? 0;
-            break;
-          case SpellcastingType.Innate:
-            character.spellsKnownNum = character.spellsPreparedNum;
-            break;
-          default:
-            character.spellsKnownNum = character.spellsPreparedNum;
-        }
-        character.knownCantripsNum = chosenClass.knownCantripsNum[0]??0;
-      }
-    }
+
 
     await ctx.prisma.characterClasses.create({
       data: {
