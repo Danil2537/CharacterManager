@@ -62,12 +62,9 @@ export const interactiveSheetRouter = createTRPCRouter({
       });
 
       if (!char) throw new Error("Character not found");
-
-      const highestSpellLevel = char.spellSlots.reduceRight(
-        (acc, val, idx) => (acc === -1 && val > 0 ? idx : acc),
-        -1
-      );
-
+      const isZero = (element:number) => element == 0;
+      const highestSpellLevel = char.spellSlots.findIndex(isZero);
+      console.log(`\n\n\n\n\nHighest spell level: ${highestSpellLevel}\n\n\n\n\n`);
       const newKnownSpells: number[] = [];
 
       for (const charClass of char.characterClasses) {
@@ -77,6 +74,7 @@ export const interactiveSheetRouter = createTRPCRouter({
         const relevantSpells = classData.spellsList.filter(
           (spell) => spell.level <= highestSpellLevel
         );
+        console.log(`\n\n\n\n\nRelevant class spellList spells: ${relevantSpells}\n\n\n\n\n`)
 
         if (classData.spellcastingType === SpellcastingType.Divine) {
           for (const spell of relevantSpells) {
@@ -194,7 +192,26 @@ export const interactiveSheetRouter = createTRPCRouter({
           });
       }),
 
+    useSpellSlot: publicProcedure
+      .input(z.object({ charId: z.number(), spellLevel: z.number().min(1).max(9) }))
+      .mutation(async ({ ctx, input }) => {
+        const char = await ctx.prisma.character.findUniqueOrThrow({
+          where: { id: input.charId },
+        });
 
+        const updatedSlots = [...(char?.currentSpellSlots ?? Array(9).fill(0))];
+        if ((updatedSlots[input.spellLevel - 1]??0) > 0) {
+          const levelIndex = input.spellLevel - 1;
+          if (typeof updatedSlots[levelIndex] === 'number' && updatedSlots[levelIndex] > 0) {
+            updatedSlots[levelIndex]--;
+          }
+        }
+
+        await ctx.prisma.character.update({
+          where: { id: input.charId },
+          data: { currentSpellSlots: updatedSlots },
+        });
+      }),
 
 
 });
