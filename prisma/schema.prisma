@@ -1,14 +1,17 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
+        
 
 // model User {
 //     id Int @id @default(autoincrement())
@@ -246,7 +249,7 @@ model Character {
     spellSlots Int[] //same as above
     spellsPreparedNum Int?//how many spells character can prepare
     knownCantripsNum Int? //how many cantrips character "knows". Cantrips are lvl0 spells, that don't require spell slots to use
-    spellsKnownNum Int? //todo: check if some classes differentiate known spells by level. afaik, this field only really matters for wizards, and they just "know" certain number with any level configuration
+    //spellsKnownNum Int? //todo: check if some classes differentiate known spells by level. afaik, this field only really matters for wizards, and they just "know" certain number with any level configuration
     spellsKnown Spell[] @relation(name: "spellsKnown") //for bards and sorcerers and such, this is spells learned on lvl-ups. For clerics and such, this contains full spell list of their class (and above spellsKnownNum therefore = class spell List size)
     spellsPrepared Spell[] @relation(name: "spellsPrepared")//this is a sub-array of spellsKnown
     //TODO: add cosmetic fields, such as biography, appearance etc

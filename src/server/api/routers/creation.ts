@@ -139,7 +139,7 @@ createCharacter: publicProcedure
         const availableSpells = chosenClass.spellsList.filter(
           (spell) => spell.level <= highestSpellLevel
         );
-
+        console.log(`AVAILABLE SPELLS: ${availableSpells}\n\n\n`)
         switch (chosenClass.spellcastingType) {
           case SpellcastingType.Arcane:
             spellsKnownNum = spellsPreparedNum + 2;
