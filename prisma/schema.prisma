@@ -29,7 +29,11 @@ enum Ability {
     Charisma
 }
 
-enum Skill {
+enum Skill {//Навички персонажа. Кожна навичка пов’язана з тою чи іншою характеристикою 
+//Приклад: dexterity=16, модифікатор характеристики = (16-10)/2=3;
+//Навичка акробатики пов’язана з dexterity, тому бонус акробатики = +3. 
+//Також, персонаж може мати «тренування» з різними навичками
+//яке дозволяє додавати //character.ProficiencyBonus до кидків навички.
   Acrobatics
   AnimalHandling
   Arcana
@@ -135,7 +139,6 @@ enum Tool {
 enum SourceType {
   CLASS
   SPECIES
-//   SUBCLASS
   BACKGROUND
   FEAT
 }
@@ -262,7 +265,7 @@ model Attack {
     notes String 
     //example: if damageDiceNums=[2,1] and damageDiceTypes=[4,12] and damageTypes=["piercing", "acid"]
     //then it's 2d4 Piercing + 1d12 Acid damage
-    damageDice Json[] //example: {"num": 1, "type": 6},
+    damageDice Json //example: {"num": 1, "type": 6},
     damageTypes String[] //slashing, piercing, acid etc
     ability Ability 
     addProfBonus Boolean 
@@ -346,7 +349,7 @@ model Species {
     feats Feat[]
     size Size @default(Medium)
     speed Int 
-    darkviion Int @default(0)//how far you see in the dark. If species don't have darkvision, it's 0
+    darkvision Int @default(0)//how far you see in the dark. If species don't have darkvision, it's 0
     description String 
     grantedSpells GrantedSpell[] @relation("SpeciesGrants")
 }
@@ -367,6 +370,7 @@ model Species {
 // Skill Proficiencies. A background gives your character proficiency in two specified skills.
 // Tool Proficiency. Each background gives a character proficiency with one tool—either a specific tool or one chosen from the Artisan's Tools category. Tools are detailed in chapter 6.
 // Equipment. Each background offers a choice between a package of equipment and 50 GP.
+
 model Background {
     id        Int     @id @default(autoincrement())
     name      String  @unique
