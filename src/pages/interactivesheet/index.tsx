@@ -30,7 +30,7 @@ export default function InteractiveSheet()
       api.interactiveSheet.prepareSpell.useMutation();
     const { mutateAsync: unprepareSpell } =
       api.interactiveSheet.unprepareSpell.useMutation();
-    const { mutateAsync: useSpellSlot } =
+    const { mutateAsync: SpellSlotMutation } =
       api.interactiveSheet.useSpellSlot.useMutation(); // You'll need to define this
       
     const [showSpells, setShowSpells] = useState(false);
@@ -166,7 +166,7 @@ export default function InteractiveSheet()
                         <button
                           className="btn"
                           onClick={() =>
-                          useSpellSlot({ charId: Number(character.id), spellLevel: Number(level) })
+                          SpellSlotMutation({ charId: Number(character.id), spellLevel: Number(level) })
                             .then(() => router.reload())
                             .catch((err) => console.error("Error using spell slot:", err))
 }
