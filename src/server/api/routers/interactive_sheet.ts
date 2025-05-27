@@ -1,7 +1,5 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { getAuth } from "@clerk/nextjs/server";
-import type { IncomingMessage } from "http";
 import { SpellcastingType } from "@prisma/client";
 
 export const interactiveSheetRouter = createTRPCRouter({
@@ -36,8 +34,9 @@ export const interactiveSheetRouter = createTRPCRouter({
     getAllItems: publicProcedure
     .input(z.object({charId: z.number()}))
     .query(async ({ctx,input})=>{
-      const charItems = await ctx.prisma.characterItems.findMany({where: { characterId: input.charId }});
-      const itemIds = (await charItems).map(charItem => charItem.itemId);
+    const charItems = await ctx.prisma.characterItems.findMany({ where: { characterId: input.charId } });
+    const itemIds = charItems.map(charItem => charItem.itemId);
+
       console.log(itemIds);
       return ctx.prisma.item.findMany({where:itemIds.length > 0 ? {id:{ notIn: itemIds }} : {}});
     }),
@@ -74,7 +73,6 @@ export const interactiveSheetRouter = createTRPCRouter({
         const relevantSpells = classData.spellsList.filter(
           (spell) => spell.level <= highestSpellLevel
         );
-        console.log(`\n\n\n\n\nRelevant class spellList spells: ${relevantSpells}\n\n\n\n\n`)
 
         if (classData.spellcastingType === SpellcastingType.Divine) {
           for (const spell of relevantSpells) {

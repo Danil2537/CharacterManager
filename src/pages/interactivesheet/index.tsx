@@ -1,12 +1,11 @@
 import { useRouter } from "next/router";
 import { api } from "../../utils/api";
-import type { CharacterItems, Item, Spell } from "@prisma/client";
+import type { Item, Spell } from "@prisma/client";
 import {useState} from "react";
 export default function InteractiveSheet()
 {
     const router = useRouter();
     const { charId } = router.query;
-    console.log(`char id ${charId}`);
     const { data: character, isLoading: isLoadingChar, isError: isErrorChar } = api.interactiveSheet.getCharacter.useQuery({ charId: Number(charId) },{enabled: !!charId,});
     const {data:items, isLoading: isLoadingItems, isError: isErrorItems} = api.interactiveSheet.getAllItems.useQuery({charId: Number(charId)});
     const { mutateAsync: addItem } = api.interactiveSheet.addItem.useMutation();
@@ -20,7 +19,7 @@ export default function InteractiveSheet()
       {
         return <p>Error when trying to add an item to the character. Either character or item id is null or undefined</p>;
       }
-      addItem(data);
+      addItem(data).catch(err => console.error("Error adding item:", err));
     };
     const { data: availableSpells } =
     api.interactiveSheet.getAvailableSpells.useQuery({
@@ -33,7 +32,7 @@ export default function InteractiveSheet()
       api.interactiveSheet.unprepareSpell.useMutation();
     const { mutateAsync: useSpellSlot } =
       api.interactiveSheet.useSpellSlot.useMutation(); // You'll need to define this
-
+      
     const [showSpells, setShowSpells] = useState(false);
     const handleSpellsButtonClick = () => setShowSpells(!showSpells);
     const handlePrepareSpellClick = async (spellId: number) => {
@@ -167,8 +166,10 @@ export default function InteractiveSheet()
                         <button
                           className="btn"
                           onClick={() =>
-                            useSpellSlot({ charId: Number(character.id), spellLevel: Number(level) }).then(() => router.reload())
-                          }
+                          useSpellSlot({ charId: Number(character.id), spellLevel: Number(level) })
+                            .then(() => router.reload())
+                            .catch((err) => console.error("Error using spell slot:", err))
+}
                         >
                           Use
                         </button>

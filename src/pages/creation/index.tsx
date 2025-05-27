@@ -2,7 +2,7 @@
 import Head from "next/head";
 import { useState, createContext, useContext, type ReactNode, useEffect } from "react";
 import { api, type RouterOutputs } from "../../utils/api";
-import { Language, type Skill } from "@prisma/client";
+import { Ability, Language, type Skill } from "@prisma/client";
 import { useRouter } from "next/navigation";
 type CharacterClass = RouterOutputs["creation"]["getAllClasses"][number];
 type Species = RouterOutputs["creation"]["getAllSpecies"][number];
@@ -110,7 +110,7 @@ function CharacterCreation() {
 
   useEffect(() => {
   if (backgroundBoostMode === "threeOnes" && selectedBackground) {
-    const boosts = Object.fromEntries(selectedBackground.abilities.map((ab: any) => [ab, 1]));
+    const boosts = Object.fromEntries(selectedBackground.abilities.map((ab: Ability) => [ab, 1]));
     setAbilityBoosts(boosts);
   }
   }, [backgroundBoostMode, selectedBackground]);
