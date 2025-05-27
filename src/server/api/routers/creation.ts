@@ -199,7 +199,6 @@ createCharacter: publicProcedure
         currentSpellSlots,
         spellSaveDC,
         spellsPreparedNum,
-        spellsKnownNum,
         knownCantripsNum,
       },
     });
