@@ -44,6 +44,7 @@ export const interactiveSheetRouter = createTRPCRouter({
     addItem: publicProcedure
     .input(z.object({charId: z.number(), itemId: z.number()}))
     .mutation(async ({ ctx, input }) => {
+      console.log(input.charId, input.itemId);
       return ctx.prisma.characterItems.create({data: {characterId: input.charId, itemId: input.itemId}})
     }),
 

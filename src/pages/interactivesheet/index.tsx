@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { api } from "../../utils/api";
 import type { Item, Spell } from "@prisma/client";
 import {useState} from "react";
+import React from "react";
 export default function InteractiveSheet()
 {
     const router = useRouter();

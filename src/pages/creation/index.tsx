@@ -4,6 +4,7 @@ import { useState, createContext, useContext, type ReactNode, useEffect } from "
 import { api, type RouterOutputs } from "../../utils/api";
 import { Ability, Language, type Skill } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import React from "react";
 type CharacterClass = RouterOutputs["creation"]["getAllClasses"][number];
 type Species = RouterOutputs["creation"]["getAllSpecies"][number];
 type Background = RouterOutputs["creation"]["getAllBackgrounds"][number];

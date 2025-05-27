@@ -11,6 +11,7 @@ import { useRef } from "react";
 import { useState, createContext, useContext, type ReactNode, useEffect } from "react";
 import { Language, type Skill } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import React from "react";
 // Define the expected type for characters
 type Character = RouterOutputs["profile"]["getUserCharacters"][number];
 
@@ -64,11 +65,39 @@ export default function Home() {
         <meta name="description" content="Manage your D&D characters" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
+      <main className="min-h-screen text-black">
+        <header className="dark:bg-gray-800 dark:text-white shadow-md w-screen h-auto">
+          <nav className="justify-start flex m-auto items-center ml-30 pt-3 mr-30 pb-2">
+            <a className="mr-10" href="">
+              <img src="/favicon.ico" alt="" />
+            </a>
+            <a className="flex items-center p-2 mr-10 border-1 border-solid rounded-lg shadow-md hover:bg-white hover:text-black hover:transition duration-400 ease-in-out" href="">
+              <svg className="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="white">
+              <path d="M19 3H14.82C14.4 1.84 13.3 1 12 1C10.7 1 9.6 1.84 9.18 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM12 2.75C12.22 2.75 12.41 2.85 12.55 3C12.67 3.13 12.75 3.31 12.75 3.5C12.75 3.91 12.41 4.25 12 4.25C11.59 4.25 11.25 3.91 11.25 3.5C11.25 3.31 11.33 3.13 11.45 3C11.59 2.85 11.78 2.75 12 2.75ZM19 19H5V5H19V19ZM12 6C10.35 6 9 7.35 9 9C9 10.65 10.35 12 12 12C13.65 12 15 10.65 15 9C15 7.35 13.65 6 12 6ZM6 16.47V18H18V16.47C18 13.97 14.03 12.89 12 12.89C9.97 12.89 6 13.96 6 16.47Z" fill="inherit"></path>
+              </svg>
+              <span className="pl-2">Мої персонажі</span>
+            </a>
+            <a className="flex items-center p-2 mr-10 border-1 border-solid rounded-lg shadow-md hover:bg-white hover:text-black hover:transition duration-400 ease-in-out" href="">
+              <svg className="fill-current" viewBox="0 0 24 24" fill="white" width="18px" height="18px">
+              <path d="M0 0h24v24H0V0z" fill="none"></path>
+              <path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path>
+              </svg>
+              <span className="pl-2">Про нас</span>
+            </a>
+              <SignedOut>
+              <SignInButton>
+              <button className="flex items-center ml-auto cursor-pointer">
+              <svg width="48" height="48" viewBox="0 0 48 48">
+              <path d="M11.1 35.25q3.15-2.2 6.25-3.375Q20.45 30.7 24 30.7q3.55 0 6.675 1.175t6.275 3.375q2.2-2.7 3.125-5.45Q41 27.05 41 24q0-7.25-4.875-12.125T24 7q-7.25 0-12.125 4.875T7 24q0 3.05.95 5.8t3.15 5.45ZM24 25.5q-2.9 0-4.875-1.975T17.15 18.65q0-2.9 1.975-4.875T24 11.8q2.9 0 4.875 1.975t1.975 4.875q0 2.9-1.975 4.875T24 25.5ZM24 44q-4.1 0-7.75-1.575-3.65-1.575-6.375-4.3-2.725-2.725-4.3-6.375Q4 28.1 4 24q0-4.15 1.575-7.775t4.3-6.35q2.725-2.725 6.375-4.3Q19.9 4 24 4q4.15 0 7.775 1.575t6.35 4.3q2.725 2.725 4.3 6.35Q44 19.85 44 24q0 4.1-1.575 7.75-1.575 3.65-4.3 6.375-2.725 2.725-6.35 4.3Q28.15 44 24 44Zm0-3q2.75 0 5.375-.8t5.175-2.8q-2.55-1.8-5.2-2.75-2.65-.95-5.35-.95-2.7 0-5.35.95-2.65.95-5.2 2.75 2.55 2 5.175 2.8Q21.25 41 24 41Zm0-18.5q1.7 0 2.775-1.075t1.075-2.775q0-1.7-1.075-2.775T24 14.8q-1.7 0-2.775 1.075T20.15 18.65q0 1.7 1.075 2.775T24 22.5Zm0-3.85Zm0 18.7Z"  fill="white"></path>
+              </svg>
+              </button>
+              </SignInButton>
+              </SignedOut>
+            
+          </nav>
+        </header>
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <SignedOut>
-            <SignInButton />
-          </SignedOut>
+          
 
           <SignedIn>
             <UserButton />
@@ -143,9 +172,9 @@ export default function Home() {
             </div>
           </SignedIn>
 
-          <Link href="creation" className="bg-white text-black px-4 py-2 rounded">
+          {/* <Link href="creation" className="bg-white text-black px-4 py-2 rounded">
             Create a Character
-          </Link>
+          </Link> */}
         </div>
       </main>
     </>

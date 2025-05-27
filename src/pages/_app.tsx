@@ -1,7 +1,7 @@
 import { type AppType } from "next/app";
 import { Geist } from "next/font/google";
 
-import { api } from "~/utils/api";
+import { api } from "../utils/api";
 import {
   ClerkProvider,
   SignInButton,
@@ -10,6 +10,7 @@ import {
   UserButton
 } from '@clerk/nextjs';
 import '~/styles/globals.css';
+import React from "react";
 const geist = Geist({
   subsets: ["latin"],
 });
