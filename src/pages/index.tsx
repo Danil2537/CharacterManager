@@ -66,9 +66,9 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="min-h-screen text-black">
-        <header className="dark:bg-gray-800 dark:text-white shadow-md w-screen h-auto">
+        <header className="dark:bg-gray-800 dark:text-white shadow-md">
           <nav className="justify-start flex m-auto items-center ml-30 pt-3 mr-30 pb-2">
-            <a className="mr-10" href="">
+            <a className="mr-10" href="#">
               <img src="/favicon.ico" alt="" />
             </a>
             <a className="flex items-center p-2 mr-10 border-1 border-solid rounded-lg shadow-md hover:bg-white hover:text-black hover:transition duration-400 ease-in-out" href="">
@@ -96,9 +96,57 @@ export default function Home() {
             
           </nav>
         </header>
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          
-
+        <main className="bg-[#20222c]">
+        <main className="bg-[#20222c] text-white m-auto max-w-[1000px]">
+        <SignedOut>
+          <div>
+            <h1 className="text-[38px] leading-[52px] pt-[34px] pb-[10px] font-bold">Інтерактивний лист для персонажа D&D</h1>
+            <p className="text-[20px] leading-[27px] mb-[34px] text-[#bdc6db]">Щоб продовжити, увійдіть до свого аккаунту або створіть новий.</p>
+            <ul className="mb-[36px]">
+              <li className="items-start flex mb-[9.28px]">
+              <svg className="h-[24px] mr-[10px] min-w-[24px] w-[24px]" width="30" height="30" viewBox="0 0 33 33" stroke="white" fill="none">
+                <path d="M16.4997 1.99976L28.4997 9.95628M16.4997 1.99976L4.49969 9.95628M16.4997 1.99976V9.69541M28.4997 9.95628L16.4997 9.69541M28.4997 9.95628L23.9345 21.1737M28.4997 9.95628V22.3476M28.4997 22.3476L16.4997 30.4345M28.4997 22.3476L23.9345 21.1737M16.4997 30.4345L4.49969 22.3476M16.4997 30.4345L9.06491 21.1737M16.4997 30.4345L23.9345 21.1737M4.49969 22.3476V9.95628M4.49969 22.3476L9.06491 21.1737M4.49969 9.95628L16.4997 9.69541M4.49969 9.95628L9.06491 21.1737M16.4997 9.69541L9.06491 21.1737M16.4997 9.69541L23.9345 21.1737M9.06491 21.1737H23.9345" stroke="inherit"></path>
+              </svg>
+              Синхронизация между несколькими устройствами
+              </li>
+              <li className="items-start flex mb-[9.28px]">
+              <svg className="h-[24px] mr-[10px] min-w-[24px] w-[24px]" width="30" height="30" viewBox="0 0 33 33" stroke="white" fill="none">
+                <path d="M16.4997 1.99976L28.4997 9.95628M16.4997 1.99976L4.49969 9.95628M16.4997 1.99976V9.69541M28.4997 9.95628L16.4997 9.69541M28.4997 9.95628L23.9345 21.1737M28.4997 9.95628V22.3476M28.4997 22.3476L16.4997 30.4345M28.4997 22.3476L23.9345 21.1737M16.4997 30.4345L4.49969 22.3476M16.4997 30.4345L9.06491 21.1737M16.4997 30.4345L23.9345 21.1737M4.49969 22.3476V9.95628M4.49969 22.3476L9.06491 21.1737M4.49969 9.95628L16.4997 9.69541M4.49969 9.95628L9.06491 21.1737M16.4997 9.69541L9.06491 21.1737M16.4997 9.69541L23.9345 21.1737M9.06491 21.1737H23.9345" stroke="inherit"></path>
+              </svg>
+              Удобное отслеживание здоровья, опыта и монет
+              </li>
+              <li className="items-start flex mb-[9.28px]">
+              <svg className="h-[24px] mr-[10px] min-w-[24px] w-[24px]" width="30" height="30" viewBox="0 0 33 33" stroke="white" fill="none">
+                <path d="M16.4997 1.99976L28.4997 9.95628M16.4997 1.99976L4.49969 9.95628M16.4997 1.99976V9.69541M28.4997 9.95628L16.4997 9.69541M28.4997 9.95628L23.9345 21.1737M28.4997 9.95628V22.3476M28.4997 22.3476L16.4997 30.4345M28.4997 22.3476L23.9345 21.1737M16.4997 30.4345L4.49969 22.3476M16.4997 30.4345L9.06491 21.1737M16.4997 30.4345L23.9345 21.1737M4.49969 22.3476V9.95628M4.49969 22.3476L9.06491 21.1737M4.49969 9.95628L16.4997 9.69541M4.49969 9.95628L9.06491 21.1737M16.4997 9.69541L9.06491 21.1737M16.4997 9.69541L23.9345 21.1737M9.06491 21.1737H23.9345" stroke="inherit"></path>
+              </svg>
+              Безопасное хранилище для ваших персонажей
+              </li>
+              <li className="items-start flex mb-[9.28px]">
+              <svg className="h-[24px] mr-[10px] min-w-[24px] w-[24px]" width="30" height="30" viewBox="0 0 33 33" stroke="white" fill="none">
+                <path d="M16.4997 1.99976L28.4997 9.95628M16.4997 1.99976L4.49969 9.95628M16.4997 1.99976V9.69541M28.4997 9.95628L16.4997 9.69541M28.4997 9.95628L23.9345 21.1737M28.4997 9.95628V22.3476M28.4997 22.3476L16.4997 30.4345M28.4997 22.3476L23.9345 21.1737M16.4997 30.4345L4.49969 22.3476M16.4997 30.4345L9.06491 21.1737M16.4997 30.4345L23.9345 21.1737M4.49969 22.3476V9.95628M4.49969 22.3476L9.06491 21.1737M4.49969 9.95628L16.4997 9.69541M4.49969 9.95628L9.06491 21.1737M16.4997 9.69541L9.06491 21.1737M16.4997 9.69541L23.9345 21.1737M9.06491 21.1737H23.9345" stroke="inherit"></path>
+              </svg>
+              Несколько популярных переводов на выбор
+              </li>
+              <li className="items-start flex mb-[9.28px]">
+              <svg className="h-[24px] mr-[10px] min-w-[24px] w-[24px]" width="30" height="30" viewBox="0 0 33 33" stroke="white" fill="none">
+                <path d="M16.4997 1.99976L28.4997 9.95628M16.4997 1.99976L4.49969 9.95628M16.4997 1.99976V9.69541M28.4997 9.95628L16.4997 9.69541M28.4997 9.95628L23.9345 21.1737M28.4997 9.95628V22.3476M28.4997 22.3476L16.4997 30.4345M28.4997 22.3476L23.9345 21.1737M16.4997 30.4345L4.49969 22.3476M16.4997 30.4345L9.06491 21.1737M16.4997 30.4345L23.9345 21.1737M4.49969 22.3476V9.95628M4.49969 22.3476L9.06491 21.1737M4.49969 9.95628L16.4997 9.69541M4.49969 9.95628L9.06491 21.1737M16.4997 9.69541L9.06491 21.1737M16.4997 9.69541L23.9345 21.1737M9.06491 21.1737H23.9345" stroke="inherit"></path>
+              </svg>
+              Автоматический расчёт характеристик
+              </li>
+              <li className="items-start flex ">
+              <svg className="h-[24px] mr-[10px] min-w-[24px] w-[24px]" width="30" height="30" viewBox="0 0 33 33" stroke="white" fill="none">
+                <path d="M16.4997 1.99976L28.4997 9.95628M16.4997 1.99976L4.49969 9.95628M16.4997 1.99976V9.69541M28.4997 9.95628L16.4997 9.69541M28.4997 9.95628L23.9345 21.1737M28.4997 9.95628V22.3476M28.4997 22.3476L16.4997 30.4345M28.4997 22.3476L23.9345 21.1737M16.4997 30.4345L4.49969 22.3476M16.4997 30.4345L9.06491 21.1737M16.4997 30.4345L23.9345 21.1737M4.49969 22.3476V9.95628M4.49969 22.3476L9.06491 21.1737M4.49969 9.95628L16.4997 9.69541M4.49969 9.95628L9.06491 21.1737M16.4997 9.69541L9.06491 21.1737M16.4997 9.69541L23.9345 21.1737M9.06491 21.1737H23.9345" stroke="inherit"></path>
+              </svg>
+              Отправка бросков в Discord
+              </li>
+            </ul>
+            <div className="justify-start pb-[150px] p-0 static">
+            <SignInButton>
+            <button className="items-center dark:bg-blue-900 border-1 border-solid border-blue-200 rounded-xs cursor-pointer flex text-xs font-bold h-[34px] justify-center tracking-normal max-w-[266px] w-[100%]  hover:bg-[#042470] hover:border-blue-100 hover:transition duration-400 ease-in-out">Увійти</button>
+            </SignInButton>
+            </div>
+          </div>
+          </SignedOut>
           <SignedIn>
             <UserButton />
             <div className="mt-4">
@@ -170,7 +218,38 @@ export default function Home() {
                 />
               </div>
             </div>
-          </SignedIn>
+            </SignedIn>
+        </main>
+        <footer className="bg-[#020022] relative z-100">
+          <div className="flex mr-[20px] pt-[40px] pb-[80px] ml-[100px] m-auto text-white">
+            <div className="flex flex-wrap items-center max-w[320px] flex-col items-start justify-start ml-0 mr-[60px] mt-0 mb-0 w-auto">
+            <p className="text-left text-[12px] font-bold leading-[16px] tracking-[1px] mb-[4px] uppercase w-[100%] text-[#a3a3a3]">Рубрикатор</p>
+            <a className="text-[14px] leading-[30px] hover: transition opacity .1s hover:text-[#878787]" href="#">Головна</a>
+            <a className="text-[14px] leading-[30px] hover: transition opacity .1s hover:text-[#878787]" href="#">Лист персонажа</a>
+            <a className="text-[14px] leading-[30px] hover: transition opacity .1s hover:text-[#878787]" href="#">О нас</a>
+            </div>
+            <div className="flex flex-wrap items-center max-w[320px] flex-col items-start justify-start ml-0 mr-[60px] mt-0 mb-0 w-auto">
+              <p className="text-left text-[12px] font-bold leading-[16px] tracking-[1px] mb-[4px] uppercase w-[100%] text-[#a3a3a3]">Соціальні мережі</p>
+              <a className="text-[14px] leading-[30px] hover: transition opacity .1s hover:text-[#878787]" href="#">Telegram</a>
+              <a className="text-[14px] leading-[30px] hover: transition opacity .1s hover:text-[#878787]" href="#">Discord</a>
+            </div>
+            <div className="flex flex-wrap items-center max-w[320px] flex-col items-start justify-start ml-0 mr-[60px] mt-0 mb-0 w-auto">
+              <p className="text-left text-[12px] font-bold leading-[16px] tracking-[1px] mb-[4px] uppercase w-[100%] text-[#a3a3a3]">Підтримати</p>
+              <a className="text-[14px] text-[#f15f2c] leading-[25px] hover: transition opacity .1s hover:text-[#878787]" href="">Boosty</a>
+            </div>
+          </div>
+          <div className="flex bg-[#1e1d3b] p-[11px]">
+            <span className="flex-row align-left ml-[80px]">
+              <span className="text-[#bfbfbf] text-[14px]">
+                ©
+                2025
+                Character Manager
+              </span>
+            </span>
+          </div>
+        </footer>
+        </main>
+        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
 
           {/* <Link href="creation" className="bg-white text-black px-4 py-2 rounded">
             Create a Character
