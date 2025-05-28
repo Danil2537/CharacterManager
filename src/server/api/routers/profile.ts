@@ -3,7 +3,7 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { getAuth } from "@clerk/nextjs/server";
 import type { IncomingMessage } from "http";
 import { TRPCError } from "@trpc/server";
-import {WeaponProperty} from "@prisma/client"
+import {WeaponProperty, type Class, type Item} from "@prisma/client"
 
 export const profileRouter = createTRPCRouter({
     getUserCharacters: publicProcedure.query(async ({ ctx }) => {
@@ -209,10 +209,10 @@ importCharacter: publicProcedure
         alignment: orig?.alignment,
         classLevels: orig?.classLevels,
         characterClasses: {
-          connect: orig.characterClasses.map((cls) => ({ id: cls.id })),
+          connect: orig.characterClasses.map((cls: Class) => ({ id: cls.id })),
         },
         characterItems: {
-          connect: orig.characterItems.map((item) => ({ id: item.id })),
+          connect: orig.characterItems.map((item: Item) => ({ id: item.id })),
         },
         },
     });
