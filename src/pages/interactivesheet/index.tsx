@@ -26,7 +26,7 @@ export default function InteractiveSheet()
     api.interactiveSheet.getAvailableSpells.useQuery({
       charId: Number(charId),
     });
-
+    const {mutateAsync: learnSpell} = api.interactiveSheet.learnSpell.useMutation();
     const { mutateAsync: prepareSpell } =
       api.interactiveSheet.prepareSpell.useMutation();
     const { mutateAsync: unprepareSpell } =
@@ -95,7 +95,7 @@ export default function InteractiveSheet()
               <button
                 className="btn mt-2"
                 onClick={() =>
-                prepareSpell({ charId: character.id, spellId: spell.id }).then(() => router.reload())
+                learnSpell({ charId: character.id, spellId: spell.id }).then(() => router.reload())
                 }
               >
                 Prepare

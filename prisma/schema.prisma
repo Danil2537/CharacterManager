@@ -101,6 +101,7 @@ enum WeaponProperty {
     Heavy
     Reach
     Special
+    Light
 }
 
 enum Size {
@@ -227,7 +228,8 @@ model Character {
     //classIDs Int[]
     //By default CharacterClasses would only be the main class, 
     //but when multiclassing, this array will contain every leveled class
-    characterClasses CharacterClasses[]
+    //characterClasses CharacterClasses[]
+    characterClasses Class[]
     //classLevels will contain how many levels in each class character has. 
     //The sum of this array should go into Level field
     classLevels Int[] @default([1])
@@ -237,7 +239,8 @@ model Character {
     // subclassID    Int?
     // subclass  Subclass? @relation("CharacterSubclass", fields: [subclassID], references: [id])
     alignment Alignment @default(LawfulGood) //This is the "lawful good", "chaotic neutral" etc thing; Doesn't really have mechanical impact;
-    characterItems CharacterItems[]
+    //characterItems CharacterItems[]
+    characterItems Item[]
     passivePerception Int //Passive Perception = 10 + Wisdom (Perception) check modifier
     carryingCapacity Int //how mush weight character can carry, in lbs.
     //on some level ups, player can choose to take either ability score increase or a feat;
@@ -276,7 +279,7 @@ model Attack {
 model CharacterWeaponProficiency {
     id          Int    @id @default(autoincrement())
     characterId Int
-    character   Character @relation(fields: [characterId], references: [id])
+    character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
     weaponId    Int?   // Nullable - Used if proficiency is for a specific weapon
     weapon      Item? @relation(fields: [weaponId], references: [id])
     property    WeaponProperty? // Nullable - Used if proficiency is for a property
@@ -286,7 +289,8 @@ model CharacterWeaponProficiency {
 
 model Class {
     id Int @id @default(autoincrement())
-    characters CharacterClasses[]
+    //characters CharacterClasses[]
+    characters Character[]
     feats Feat[]
     name String @default("Unknown")
     description String 
@@ -331,13 +335,13 @@ model Class {
     spellsPrepared Int[]
 }
 
-model CharacterClasses {
-    @@id([characterId, classId])
-    character Character @relation(fields: [characterId], references:[id])
-    characterId Int
-    class Class @relation(fields: [classId], references: [id])
-    classId Int 
-}
+// model CharacterClasses {
+//     @@id([characterId, classId])
+//     character Character @relation(fields: [characterId], references:[id])
+//     characterId Int
+//     class Class @relation(fields: [classId], references: [id])
+//     classId Int 
+// }
 
 model Species {
     //technically, some species have "sub species", like dragonborn having "Draconic Ancestors";
@@ -441,13 +445,13 @@ model Spell {
     GrantedSpell GrantedSpell[] @relation("SpellGrants")
 }
 
-model CharacterItems {
-    @@id([characterId, itemId])
-    character Character @relation(fields: [characterId], references:[id])
-    characterId Int
-    item Item @relation(fields: [itemId], references: [id])
-    itemId Int
-}
+// model CharacterItems {
+//     @@id([characterId, itemId])
+//     character Character @relation(fields: [characterId], references:[id])
+//     characterId Int
+//     item Item @relation(fields: [itemId], references: [id])
+//     itemId Int
+// }
 
 model Item {
     id Int @id @default(autoincrement())
@@ -456,7 +460,8 @@ model Item {
     weight Float
     price Float
     type String
-    characters CharacterItems[]
+    //characters CharacterItems[]
+    characters Character[]
     class Class[]
     backgrounds Background[]
     isTool Boolean @default(false)

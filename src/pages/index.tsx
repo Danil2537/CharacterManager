@@ -167,7 +167,7 @@ export default function Home() {
                         {/* Subclass: {character.subclass?.name ?? "None"} <br /> */}
                         Classes:{" "}
                         {character.characterClasses
-                          ?.map((cc) => cc.class?.name ?? "Unknown")
+                          ?.map((cc) => cc?.name ?? "Unknown")
                           .join(", ") ?? "None"}
                       </div>
                       <div className="mt-2 flex gap-2">

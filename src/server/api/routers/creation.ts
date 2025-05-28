@@ -180,24 +180,30 @@ export const creationRouter = createTRPCRouter({
           spellSaveDC,
           spellsPreparedNum,
           knownCantripsNum,
+          characterClasses: {
+            connect: {id: chosenClass.id}
+          },
+          characterItems: {
+            connect: chosenEquipment.map((item) => ({ id: item.id })),
+          },
         },
       });
 
-      await ctx.prisma.characterClasses.create({
-        data: {
-          characterId: character.id,
-          classId: chosenClass.id,
-        },
-      });
+      // await ctx.prisma.characterClasses.create({
+      //   data: {
+      //     characterId: character.id,
+      //     classId: chosenClass.id,
+      //   },
+      // });
 
-      if (chosenEquipment.length > 0) {
-        await ctx.prisma.characterItems.createMany({
-          data: chosenEquipment.map((item) => ({
-            characterId: character.id,
-            itemId: item.id,
-          })),
-        });
-      }
+      // if (chosenEquipment.length > 0) {
+      //   await ctx.prisma.characterItems.createMany({
+      //     data: chosenEquipment.map((item) => ({
+      //       characterId: character.id,
+      //       itemId: item.id,
+      //     })),
+      //   });
+      // }
 
       if (chosenClass.weaponProfs?.length) {
         await ctx.prisma.characterWeaponProficiency.createMany({

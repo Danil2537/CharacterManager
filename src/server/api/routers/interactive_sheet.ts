@@ -12,12 +12,8 @@ export const interactiveSheetRouter = createTRPCRouter({
         species: true,
         background: true,
         //subclass: true,
-        characterClasses: {
-          include: { class: true },
-        },
-        characterItems: {
-          include: { item: true },
-        },
+        characterClasses: true,
+        characterItems: true,
         weaponProficiencies: {
           include: { weapon: true },
         },
@@ -27,26 +23,36 @@ export const interactiveSheetRouter = createTRPCRouter({
         spellsPrepared: true,
       },
     });
-    //console.log(`\n\n\nLOADED CHARACTER: ${char}`);
     return char;
     }),
 
     getAllItems: publicProcedure
-    .input(z.object({charId: z.number()}))
-    .query(async ({ctx,input})=>{
-    const charItems = await ctx.prisma.characterItems.findMany({ where: { characterId: input.charId } });
-    const itemIds = charItems.map(charItem => charItem.itemId);
+      .input(z.object({ charId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const character = await ctx.prisma.character.findUnique({
+          where: { id: input.charId },
+          include: { characterItems: true },
+        });
 
-      console.log(itemIds);
-      return ctx.prisma.item.findMany({where:itemIds.length > 0 ? {id:{ notIn: itemIds }} : {}});
-    }),
+        const itemIds = character?.characterItems.map(item => item.id) ?? [];
+
+        return ctx.prisma.item.findMany({
+          where: itemIds.length > 0 ? { id: { notIn: itemIds } } : {},
+        });
+      }),
 
     addItem: publicProcedure
-    .input(z.object({charId: z.number(), itemId: z.number()}))
-    .mutation(async ({ ctx, input }) => {
-      console.log(input.charId, input.itemId);
-      return ctx.prisma.characterItems.create({data: {characterId: input.charId, itemId: input.itemId}})
-    }),
+      .input(z.object({ charId: z.number(), itemId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        return ctx.prisma.character.update({
+          where: { id: input.charId },
+          data: {
+            characterItems: {
+              connect: { id: input.itemId },
+            },
+          },
+        });
+      }),
 
     getAvailableSpells: publicProcedure
     .input(z.object({ charId: z.number() }))
@@ -54,9 +60,7 @@ export const interactiveSheetRouter = createTRPCRouter({
       const char = await ctx.prisma.character.findFirst({
         where: { id: input.charId },
         include: {
-          characterClasses: {
-            include: { class: { include: { spellsList: true } } },
-          },
+          characterClasses: {include: {spellsList: true}},
           spellsKnown: true,
         },
       });
@@ -68,9 +72,9 @@ export const interactiveSheetRouter = createTRPCRouter({
       const newKnownSpells: number[] = [];
 
       for (const charClass of char.characterClasses) {
-        const classData = charClass.class;
+        const classData = charClass;
         if (!classData) continue;
-
+        
         const relevantSpells = classData.spellsList.filter(
           (spell) => spell.level <= highestSpellLevel
         );
@@ -101,32 +105,81 @@ export const interactiveSheetRouter = createTRPCRouter({
       const updatedChar = await ctx.prisma.character.findFirst({
         where: { id: input.charId },
         include: {
-          characterClasses: {
-            include: { class: { include: { spellsList: true } } },
-          },
+          characterClasses: { include: { spellsList: true } }
         },
       });
 
       const availableSpells = updatedChar?.characterClasses.flatMap((charClass) =>
-        charClass.class?.spellsList.filter(
+        charClass?.spellsList.filter(
           (spell) => spell.level <= highestSpellLevel
         )
       ) ?? [];
 
       return availableSpells;
     }),
+    
     learnSpell: publicProcedure
       .input(z.object({ charId: z.number(), spellId: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        return await ctx.prisma.character.update({
-          where: { id: input.charId },
-          data: {
-            spellsKnown: {
-              connect: { id: input.spellId },
-            },
-          },
+        const spell = await ctx.prisma.spell.findFirst({where: {id: input.spellId}});
+        const char = await ctx.prisma.character.findFirst(
+          {where: { id: input.charId }, 
+          include: {characterClasses: true, spellsPrepared: true, spellsKnown: true}
         });
+        if((spell?.level??0)>0) {
+          if(char?.characterClasses[0]?.spellcastingType==SpellcastingType.Innate)
+          {
+            await ctx.prisma.character.update({
+              where: { id: input.charId },
+              data: {
+                spellsKnown: {
+                  connect: { id: spell?.id },
+                },
+              },
+            });
+            if((char?.spellsPreparedNum??0)>char?.spellsPrepared.length) {
+              await ctx.prisma.character.update({
+              where: { id: input.charId },
+              data: {
+                spellsPrepared: {
+                  connect: { id: spell?.id },
+                },
+              },
+            });
+            }
+            else 
+            {
+              console.log(`ERROR: INNATE SPELLCASTER CANNOT LEAERN MORE SPELLS THAN THEY CAN PREPARE`); //TODO: add this constraint in ui
+            }
+          }
+        }
+        else {
+          if((char?.knownCantripsNum??0)>(char?.spellsKnown.filter((spell) => spell.level == 0).length??0))
+          {
+            console.log(`\n\n\nAlready known cantrips: ${char?.spellsKnown.filter((spell) => spell.level == 0).length}\n\n\n`);
+            await ctx.prisma.character.update({
+              where: { id: input.charId },
+              data: {
+                spellsKnown: {
+                  connect: { id: spell?.id },
+                },
+              },
+            });
+            await ctx.prisma.character.update({
+              where: { id: input.charId },
+              data: {
+                spellsPrepared: {
+                  connect: { id: spell?.id },
+                },
+              },
+            });
+          }
+          else {
+            console.log(`ERROR: CHARACTER CAN'T KNOW MORE CANTRIPS`);
+          }
+        }
       }),
+
 
       prepareSpell: publicProcedure
       .input(z.object({ charId: z.number(), spellId: z.number() }))
@@ -156,6 +209,10 @@ export const interactiveSheetRouter = createTRPCRouter({
           if (nonCantripPreparedCount >= (char?.spellsPreparedNum??0)) {
             throw new Error("You cannot prepare more spells.");
           }
+        }
+        const knownCantripsCount = char.spellsKnown.filter(s => s.level === 0).length;
+        if ((char.knownCantripsNum ?? 0)  <= knownCantripsCount){
+          throw new Error("Cannot learn (prepare) more cantrips");
         }
 
         return ctx.prisma.character.update({

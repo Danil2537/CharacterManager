@@ -22,11 +22,7 @@ export const profileRouter = createTRPCRouter({
                     species: true,
                     background: true,
                     //subclass: true,
-                    characterClasses: {
-                        include: {
-                            class: true
-                        }
-                    }
+                    characterClasses: true,
                 }
             }) ?? [];
 
@@ -49,12 +45,8 @@ cloneCharacter: publicProcedure
         species: true,
         background: true,
         //subclass: true,
-        characterClasses: {
-          include: { class: true },
-        },
-        characterItems: {
-          include: { item: true },
-        },
+        characterClasses: true,
+        characterItems: true,
         weaponProficiencies: {
           include: { weapon: true },
         },
@@ -71,7 +63,7 @@ cloneCharacter: publicProcedure
     if (!newHitDice && orig.classLevels && orig.characterClasses) {
       newHitDice = orig.classLevels.map((num, i) => ({
         num: num ?? 1,
-        faces: orig.characterClasses[i]?.class?.hitDiceType ?? 6,
+        faces: orig.characterClasses[i]?.hitDiceType ?? 6,
       }));
     }
 
@@ -101,34 +93,40 @@ cloneCharacter: publicProcedure
         exhaustionLevel: orig.exhaustionLevel,
         maxHitPoints: orig.maxHitPoints,
         currentHitPoints: orig.currentHitPoints,
-        hitDice: orig?.hitDice??orig.classLevels.map((num, i) => ({num: num ?? 1, faces: orig.characterClasses[i]?.class?.hitDiceType ?? 6,})),
+        hitDice: orig?.hitDice??orig.classLevels.map((num, i) => ({num: num ?? 1, faces: orig.characterClasses[i]?.hitDiceType ?? 6,})),
         experience: orig.experience,
         level: orig.level,
         passivePerception: orig.passivePerception ?? Math.floor(((orig.abilityScores[4] ?? 10) - 10) / 2) + 10,
         carryingCapacity: orig.carryingCapacity ?? 100,
         alignment: orig.alignment,
         classLevels: orig.classLevels,
+         characterClasses: {
+          connect: orig.characterClasses.map((cls) => ({ id: cls.id })),
+        },
+        characterItems: {
+          connect: orig.characterItems.map((item) => ({ id: item.id })),
+        },
       },
     });
 
-    if (orig.characterClasses) {
-      await ctx.prisma.characterClasses.createMany({
-        data: orig.characterClasses.map((cc) => ({
-          characterId: character.id,
-          classId: cc.class.id,
-        })),
-      });
-    }
+    // if (orig.characterClasses) {
+    //   await ctx.prisma.characterClasses.createMany({
+    //     data: orig.characterClasses.map((cc) => ({
+    //       characterId: character.id,
+    //       classId: cc.class.id,
+    //     })),
+    //   });
+    // }
 
-    if (orig.characterItems) {
-      await ctx.prisma.characterItems.createMany({
-        data: orig.characterItems.map((ci) => ({
-          characterId: character.id,
-          itemId: ci.item.id,
-        })),
-        skipDuplicates: true,
-      });
-    }
+    // if (orig.characterItems) {
+    //   await ctx.prisma.characterItems.createMany({
+    //     data: orig.characterItems.map((ci) => ({
+    //       characterId: character.id,
+    //       itemId: ci.item.id,
+    //     })),
+    //     skipDuplicates: true,
+    //   });
+    // }
 
     if (orig.weaponProficiencies) {
       await ctx.prisma.characterWeaponProficiency.createMany({
@@ -153,12 +151,8 @@ exportCharacter: publicProcedure
         species: true,
         background: true,
         //subclass: true,
-        characterClasses: {
-          include: { class: true },
-        },
-        characterItems: {
-          include: { item: true },
-        },
+        characterClasses: true,
+        characterItems: true,
         weaponProficiencies: {
           include: { weapon: true },
         },
@@ -214,27 +208,33 @@ importCharacter: publicProcedure
         carryingCapacity: orig?.carryingCapacity ?? 100,
         alignment: orig?.alignment,
         classLevels: orig?.classLevels,
+        characterClasses: {
+          connect: orig.characterClasses.map((cls) => ({ id: cls.id })),
+        },
+        characterItems: {
+          connect: orig.characterItems.map((item) => ({ id: item.id })),
+        },
         },
     });
 
-    if (orig.characterClasses) {
-        await ctx.prisma.characterClasses.createMany({
-        data: orig.characterClasses.map((cc: { class: { id: number; }; }) => ({
-            characterId: character.id,
-            classId: cc.class.id,
-        })),
-        });
-    }
+    // if (orig.characterClasses) {
+    //     await ctx.prisma.characterClasses.createMany({
+    //     data: orig.characterClasses.map((cc: { class: { id: number; }; }) => ({
+    //         characterId: character.id,
+    //         classId: cc.class.id,
+    //     })),
+    //     });
+    // }
 
-    if (orig.characterItems) {
-        await ctx.prisma.characterItems.createMany({
-        data: orig.characterItems.map((ci: { item: { id: number; }; }) => ({
-            characterId: character.id,
-            itemId: ci.item.id,
-        })),
-        skipDuplicates: true,
-        });
-    }
+    // if (orig.characterItems) {
+    //     await ctx.prisma.characterItems.createMany({
+    //     data: orig.characterItems.map((ci: { item: { id: number; }; }) => ({
+    //         characterId: character.id,
+    //         itemId: ci.item.id,
+    //     })),
+    //     skipDuplicates: true,
+    //     });
+    // }
 
     if (orig.weaponProficiencies) {
         await ctx.prisma.characterWeaponProficiency.createMany({
