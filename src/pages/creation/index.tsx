@@ -228,8 +228,8 @@ const [openSpeciesDescription, setOpenSpeciesDescription] = useState<number | nu
                       className={`text-white p-5 rounded-md border text-sm font-medium flex items-center justify-center mt-[10px] w-[300px] hover:transition duration-400 ease-in-out cursor-pointer
                         ${
                           selectedClass?.name === classObj.name
-                            ? 'bg-blue-600 text-white border-blue-400'
-                            : 'bg-[#1a1a2e] text-white border-gray-600 hover:border-blue-400'
+                            ? "bg-blue-600 text-white border-blue-400"
+                            : "bg-[#1a1a2e] text-white border-gray-600 hover:border-blue-400"
                         }`}
                       onClick={() => {
                         setClass(classObj);
@@ -280,7 +280,7 @@ const [openSpeciesDescription, setOpenSpeciesDescription] = useState<number | nu
                         );
                       }}
                       className={`p-4 rounded-md border transition duration-200 text-sm font-medium items-center justify-center flex cursor-pointer
-                        ${isSelected ? 'bg-blue-600 text-white border-blue-400' : 'bg-[#1a1a2e] text-white border-gray-600 hover:border-blue-400'}
+                        ${isSelected ? "bg-blue-600 text-white border-blue-400" : "bg-[#1a1a2e] text-white border-gray-600 hover:border-blue-400"}
                       `}
                     >
                       {skill}
@@ -305,8 +305,8 @@ const [openSpeciesDescription, setOpenSpeciesDescription] = useState<number | nu
                     <button
                       className={`text-white p-4 rounded-md border text-sm font-medium w-full hover:transition duration-300 ease-in-out cursor-pointer
                         ${selectedSpecies?.id === speciesObj.id
-                          ? 'bg-blue-600 border-blue-400'
-                          : 'bg-[#1a1a2e] border-gray-600 hover:border-blue-400'}
+                          ? "bg-blue-600 border-blue-400"
+                          : "bg-[#1a1a2e] border-gray-600 hover:border-blue-400"}
                       `}
                       onClick={() => setSpecies(speciesObj)}
                     >
@@ -340,13 +340,13 @@ const [openSpeciesDescription, setOpenSpeciesDescription] = useState<number | nu
           <div className="text-white px-[30px] py-[30px] border border-gray-700 rounded w-[1000px] flex flex-col items-center justify-center bg-[#121222]">
     
             <div className="w-full max-w-[500px] mb-6">
-              <label className="block text-lg mb-2 flex flex-col items-center justify-center">Ім'я персонажа:</label>
+              <label className="block text-lg mb-2 flex flex-col items-center justify-center">Ім$aposя персонажа:</label>
                 <input
                   type="text"
                   value={characterName}
                   onChange={(e) => setCharacterName(e.target.value)}
                   className="w-full p-3 rounded-md bg-[#1a1a2e] border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Введіть ім'я"
+                  placeholder="Введіть ім&aposя"
                 />
             </div>
 
@@ -362,8 +362,8 @@ const [openSpeciesDescription, setOpenSpeciesDescription] = useState<number | nu
             <button
               className={`text-white p-4 rounded-md border text-sm font-medium w-full hover:transition duration-300 ease-in-out cursor-pointer
                 ${selectedBackground?.id === bg.id
-                  ? 'bg-blue-600 border-blue-400'
-                  : 'bg-[#1a1a2e] border-gray-600 hover:border-blue-400'}
+                  ? "bg-blue-600 border-blue-400"
+                  : "bg-[#1a1a2e] border-gray-600 hover:border-blue-400"}
               `}
               onClick={() => {
                 setBackground(bg);
@@ -493,7 +493,7 @@ const [openSpeciesDescription, setOpenSpeciesDescription] = useState<number | nu
                   );
                 }}
                 className={`p-4 rounded-md border transition duration-200 text-sm font-medium items-center justify-center flex cursor-pointer
-                  ${selected ? 'bg-blue-600 text-white border-blue-400' : 'bg-[#1a1a2e] text-white border-gray-600 hover:border-blue-400'}
+                  ${selected ? "bg-blue-600 text-white border-blue-400" : "bg-[#1a1a2e] text-white border-gray-600 hover:border-blue-400"}
                 `}
               >
                 {lang}
@@ -563,8 +563,8 @@ const [openSpeciesDescription, setOpenSpeciesDescription] = useState<number | nu
             key={item.id}
             className={`border rounded-md p-4 text-center font-medium cursor-pointer transition duration-200
             ${selectedEquipment.includes(item.id)
-              ? 'bg-blue-600 border-blue-400 text-white'
-              : 'bg-[#1a1a2e] border-gray-600 hover:border-blue-400 hover:bg-[#1f1f30]'}`}
+              ? "bg-blue-600 border-blue-400 text-white"
+              : "bg-[#1a1a2e] border-gray-600 hover:border-blue-400 hover:bg-[#1f1f30]"}`}
             onClick={() => handleEquipmentToggle(item.id)}
           >
             {item.name}

@@ -121,7 +121,7 @@ export const interactiveSheetRouter = createTRPCRouter({
             connect: { id: attack.id },
           },
           };
-          ctx.prisma.character.update({
+          await ctx.prisma.character.update({
           where: { id: input.charId },
           data: characterUpdateWeapon,
         });

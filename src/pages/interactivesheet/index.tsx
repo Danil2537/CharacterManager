@@ -159,11 +159,11 @@ export default function InteractiveSheet()
               <p>{spell.description}</p>
               <button
                 className="btn mt-2"
-                onClick={() =>
-                  learnSpell({ charId: character.id, spellId: spell.id }).then(() => {
-                    refetchCharacter();
-                    refetchAvailableSpells();
-                  })
+                onClick={() => {
+                    await learnSpell({ charId: character.id, spellId: spell.id });
+                    await refetchCharacter();
+                    await refetchAvailableSpells();
+                }
                 }
               >
                 Prepare

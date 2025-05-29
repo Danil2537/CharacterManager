@@ -201,7 +201,7 @@ export const creationRouter = createTRPCRouter({
       
       
       
-        chosenEquipment
+        await Promise.all(chosenEquipment
           .filter(item => item.isWeapon)
           .map(async item => {
             console.log(`\n\n\nCREATING AN ATTACK FROM ITEM: ${item.name}\n\n\n`);
@@ -220,7 +220,7 @@ export const creationRouter = createTRPCRouter({
                 },
               },
             });
-          })
+          }));
       
 
       // await ctx.prisma.characterClasses.create({
