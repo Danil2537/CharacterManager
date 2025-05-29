@@ -12,6 +12,8 @@ import { useState, createContext, useContext, type ReactNode, useEffect } from "
 import { Language, type Skill } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import React from "react";
+import router from "next/router";
+<link rel="stylesheet" href="./styles/global.css" />
 // Define the expected type for characters
 type Character = RouterOutputs["profile"]["getUserCharacters"][number];
 
@@ -58,6 +60,7 @@ export default function Home() {
     importCharacter.mutate({characterData: data});
   };
 
+
   return (
     <>
       <Head>
@@ -93,11 +96,16 @@ export default function Home() {
               </button>
               </SignInButton>
               </SignedOut>
+              <SignedIn> 
+                <div className="flex items-center ml-auto cursor-pointer w-[30px] h-[30px] override-clerk-avatar">
+                <UserButton />
+                </div>
+              </SignedIn>
             
           </nav>
         </header>
         <main className="bg-[#20222c]">
-        <main className="bg-[#20222c] text-white m-auto max-w-[1000px]">
+        <main className="bg-[#20222c] text-white m-auto max-w-[1000px] h-[567px]">
         <SignedOut>
           <div>
             <h1 className="text-[38px] leading-[52px] pt-[34px] pb-[10px] font-bold">Інтерактивний лист для персонажа D&D</h1>
@@ -148,75 +156,101 @@ export default function Home() {
           </div>
           </SignedOut>
           <SignedIn>
-            <UserButton />
-            <div className="mt-4">
-              <h2 className="text-2xl font-bold">Your Characters:</h2>
+            <div className="pt-[15px] w-[1000px]">
+              <h2 className="flex items-center space-x-3 pt-[10px] pb-[20px]">Your Characters: 
+                <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+                className="block hover:bg-[#3a3e50] ml-[20px] px-[10px] py-[10px] cursor-pointer border border-gray-700 rounded"
+              >
+                Import
+              </button>
+              </h2>
               {isLoading && <p>Loading characters...</p>}
               {isError && <p>Failed to load characters.</p>}
               {characters?.length ? (
-                <ul className="space-y-6">
-                  {characters.map((character: Character) => (
-                    <li
+                <ul className="space-y-6 flex flex-wrap gap-4">
+                {characters.map((character: Character) => (
+                      <li
                       key={character.id}
-                      className="border border-white rounded p-4"
-                    >
-                      <div className="font-bold text-xl">{character.name}</div>
+                      onClick={() => router.push(`/interactivesheet?charId=${character.id}`)}
+                      className="relative bg-[#222533] border border-[#333a50] hover:border-[#3f5ce2] 
+                             rounded-lg p-4 w-[300px] text-white space-y-2 cursor-pointer"
+                      >
+                      <div className="font-bold">{character.name}</div>
                       <div>
                         Species: {character.species?.name ?? "Unknown"} <br />
                         Background: {character.background?.name ?? "Unknown"} <br />
-                        {/* Subclass: {character.subclass?.name ?? "None"} <br /> */}
                         Classes:{" "}
                         {character.characterClasses
                           ?.map((cc) => cc?.name ?? "Unknown")
                           .join(", ") ?? "None"}
                       </div>
-                      <div className="mt-2 flex gap-2">
-                        <button
-                          onClick={() => cloneCharacter.mutate({ charId: character.id })}
-                          className="bg-yellow-500 px-3 py-1 rounded"
-                        >
-                          Clone
-                        </button>
-                        <button
-                          onClick={() => deleteCharacter.mutate({ id: character.id })}
-                          className="bg-red-600 px-3 py-1 rounded"
-                        >
-                          Delete
-                        </button>
-                        <button
-                          onClick={() => exportCharacter.mutate({ charId: character.id })}
-                          className="bg-blue-600 px-3 py-1 rounded"
-                        >
-                          Export
-                        </button>
-                        <Link
-                          href={`/interactivesheet?charId=${character.id}`}
-                          className="bg-green-600 px-3 py-1 rounded inline-block">
-                          View Sheet
-                        </Link>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No characters found.</p>
-              )}
+                      <div className="text-green-400 text-sm">💚{character.currentHitPoints} / {character.maxHitPoints} HP</div>
+                      <div
+                        className="absolute top-2 right-2 group"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button className="text-gray-400 hover:text-white text-xl">⋮</button>
+                        <div className="hidden group-hover:block absolute right-0 w-30 bg-[#2c2e3c] border border-gray-700 rounded shadow-lg z-10">
+                          <div className="flex flex-col items-center">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              cloneCharacter.mutate({ charId: character.id });
+                            }}
+                            className="block px-4 py-2 hover:bg-[#3a3e50] cursor-pointer"
+                          >
+                            Clone
+                          </button>
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="application/json"
+                            className="hidden"
+                            onChange={handleFileUpload}
+                         />
 
-              <div className="mt-6 flex flex-col items-center">
-                <button
-                  className="bg-green-600 px-4 py-2 rounded mb-2"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  Import Character
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="application/json"
-                  className="hidden"
-                  onChange={handleFileUpload}
-                />
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              exportCharacter.mutate({ charId: character.id });
+                            }}
+                            className="block px-4 py-2 hover:bg-[#3a3e50] cursor-pointer"
+                          >
+                            Export
+                          </button>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteCharacter.mutate({ id: character.id });
+                            }}
+                            className="block px-4 py-2 text-red-400 hover:bg-[#3a3e50] cursor-pointer"
+                          >
+                            Delete
+                          </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </li>
+                            ))}
+              <div className="relative bg-[#222533] border border-[#333a50] hover:border-[#3f5ce2] rounded-lg w-[300px] text-white space-y-2 cursor-pointer">
+              <Link href="creation" className="flex items-center justify-center text-[50px]">
+                    +
+                </Link>
               </div>
+              </ul>
+              ) : (
+                <>
+                <div className="relative bg-[#222533] border border-[#333a50] hover:border-[#3f5ce2] rounded-lg w-[300px] text-white space-y-2 cursor-pointer">
+                      <Link href="creation" className="flex items-center justify-center text-[50px]">
+                        +
+                      </Link>
+                </div></>
+              )}
             </div>
             </SignedIn>
         </main>
@@ -249,7 +283,7 @@ export default function Home() {
           </div>
         </footer>
         </main>
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
+        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 hidden">
 
           {/* <Link href="creation" className="bg-white text-black px-4 py-2 rounded">
             Create a Character

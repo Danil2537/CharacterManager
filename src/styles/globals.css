@@ -4,3 +4,8 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
+
+.override-clerk-avatar .cl-internal-1j7ahlv {
+  width: 50px !important;
+  height: 50px !important;
+}
