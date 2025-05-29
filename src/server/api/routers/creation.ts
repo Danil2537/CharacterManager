@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getAuth } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { Alignment, Language, Skill, SpellcastingType } from "@prisma/client";
-import type { Ability } from "@prisma/client"; // ✅ type-only import
+import { Ability } from "@prisma/client"; 
 
 const abilityIndexMap: Record<Ability, number> = {
   Strength: 0,
@@ -56,9 +56,9 @@ export const creationRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const [chosenClass, chosenSpecies, chosenBackground, chosenEquipment] = await Promise.all([
-        ctx.prisma.class.findFirst({ where: { id: input.chosenClassId }, include: { spellsList: true } }),
-        ctx.prisma.species.findFirst({ where: { id: input.chosenSpeciesId } }),
-        ctx.prisma.background.findFirst({ where: { id: input.chosenBackgroundId } }),
+        ctx.prisma.class.findFirst({ where: { id: input.chosenClassId }, include: { spellsList: true, feats: true }}),
+        ctx.prisma.species.findFirst({ where: { id: input.chosenSpeciesId }, include: {feats: true}}),
+        ctx.prisma.background.findFirst({ where: { id: input.chosenBackgroundId }, include: {feats: true}}),
         ctx.prisma.item.findMany({ where: { id: { in: input.chosenEquipmentIds } } }),
       ]);
 
@@ -141,6 +141,13 @@ export const creationRouter = createTRPCRouter({
         }
       }
 
+      const featIds = Array.from(
+      new Set([
+        ...chosenClass?.feats.map((f) => f.id) ?? [],
+        ...chosenSpecies?.feats.map((f) => f.id) ?? [],
+        ...chosenBackground?.feats.map((f) => f.id) ?? [],
+      ]));
+
       const character = await ctx.prisma.character.create({
         data: {
           name: input.chosenName,
@@ -186,8 +193,35 @@ export const creationRouter = createTRPCRouter({
           characterItems: {
             connect: chosenEquipment.map((item) => ({ id: item.id })),
           },
+          feats: {
+            connect: featIds.map((id) => ({ id })),
+          },
         },
       });
+      
+      
+      
+        chosenEquipment
+          .filter(item => item.isWeapon)
+          .map(async item => {
+            console.log(`\n\n\nCREATING AN ATTACK FROM ITEM: ${item.name}\n\n\n`);
+            await ctx.prisma.attack.create({
+              data: {
+                name: item.name,
+                toHitBonus: Math.floor(((character?.abilityScores[0] ?? 0) - 10) / 2),
+                notes: "",
+                damageDice: item.damageDice ?? { num: 1, faces: 4 },
+                damageTypes: item.damageType ?? "",
+                ability: Ability.Strength,
+                addProfBonus: false,
+                additionalModifier: 0,
+                Character: {
+                  connect: { id: character.id },
+                },
+              },
+            });
+          })
+      
 
       // await ctx.prisma.characterClasses.create({
       //   data: {

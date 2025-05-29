@@ -1,31 +1,71 @@
 import { useRouter } from "next/router";
 import { api } from "../../utils/api";
-import type { Item, Spell } from "@prisma/client";
-import {useState} from "react";
+import type { Attack, Item, Spell } from "@prisma/client";
+import {Ability} from "@prisma/client"
+import {useEffect, useState} from "react";
 import React from "react";
+import type { z } from "zod";
+import { createEmitAndSemanticDiagnosticsBuilderProgram } from "typescript";
+import { EditableAttack } from "../../components/editableattack";
+
+type DamageDice = {
+  num: number;
+  type: number;
+};
+type Props = {
+  attack: Attack;
+  onSave: (updated: Attack) => void;
+};
+
 export default function InteractiveSheet()
 {
     const router = useRouter();
     const { charId } = router.query;
-    const { data: character, isLoading: isLoadingChar, isError: isErrorChar } = api.interactiveSheet.getCharacter.useQuery({ charId: Number(charId) },{enabled: !!charId,});
-    const {data:items, isLoading: isLoadingItems, isError: isErrorItems} = api.interactiveSheet.getAllItems.useQuery({charId: Number(charId)});
+    const numericCharId = typeof charId === "string" ? Number(charId) : Array.isArray(charId) ? Number(charId[0]) : undefined;
+    const enabled = !isNaN(typeof charId === "string" ? Number(charId) : Array.isArray(charId) ? Number(charId[0]) : NaN);
+    const {
+      data: character,
+      isLoading: isLoadingChar,
+      isError: isErrorChar,
+      refetch: refetchCharacter
+    } = api.interactiveSheet.getCharacter.useQuery({ charId: Number(charId) }, { enabled: !!charId });
+    const {
+      data: items,
+      isLoading: isLoadingItems,
+      isError: isErrorItems,
+      refetch: refetchItems
+    } = api.interactiveSheet.getAllItems.useQuery({ charId: Number(charId) });
+    const {
+      data: attacksData,
+      isLoading: isLoadingAttacks,
+      isError: isErrorAttacks,
+      refetch: refetchAttacks
+    } = api.interactiveSheet.getCharAttacks.useQuery({charId: Number(charId)}, { enabled });
+    
     const { mutateAsync: addItem } = api.interactiveSheet.addItem.useMutation();
+    const {mutateAsync: deleteItem} = api.interactiveSheet.deleteItem.useMutation();
+    const {mutateAsync: updateAttacks} = api.interactiveSheet.updateAttacks.useMutation();
     const [showItems, setShowItems] = useState(false);
     const handleItemButtonClick = () =>{setShowItems(!showItems);};
     const [showInventory, setShowInventory] = useState(false);
+    const [showAttacks, setShowAttacks] = useState(false);
     const handleInventoryButtonClick = () =>{setShowInventory(!showInventory);};    
     const handleAddItemButtonClick = (itemId: number) => {
-      const data = {charId: character?.id??0, itemId: itemId??0};
-      if(data.charId==0 || data.itemId==0)
-      {
-        return <p>Error when trying to add an item to the character. Either character or item id is null or undefined</p>;
-      }
-      addItem(data).catch(err => console.error("Error adding item:", err));
+    const data = { charId: character?.id ?? 0, itemId: itemId ?? 0 };
+    if (data.charId === 0 || data.itemId === 0) return;
+    addItem(data)
+      .then(() => refetchCharacter())
+      .catch(err => console.error("Error adding item:", err));
     };
-    const { data: availableSpells } =
-    api.interactiveSheet.getAvailableSpells.useQuery({
-      charId: Number(charId),
-    });
+    const handleDeleteItemButtonClick = (itemId: number) => {
+      deleteItem({itemId: itemId}).then(()=>refetchItems())
+      .catch(err => console.error("Error deleting item (client): ",err));
+    };
+    const handleShowAttacksButtonClick = () => {setShowAttacks(!showAttacks);};
+    const {
+      data: availableSpells,
+      refetch: refetchAvailableSpells
+    } = api.interactiveSheet.getAvailableSpells.useQuery({ charId: Number(charId) });
     const {mutateAsync: learnSpell} = api.interactiveSheet.learnSpell.useMutation();
     const { mutateAsync: prepareSpell } =
       api.interactiveSheet.prepareSpell.useMutation();
@@ -40,7 +80,7 @@ export default function InteractiveSheet()
       if (!character?.id) return;
       try {
         await prepareSpell({ charId: character.id, spellId });
-        router.reload(); // Reload to update spellPrepared list
+        await refetchCharacter();
       } catch (error) {
         console.error("Failed to prepare spell:", error);
       }
@@ -48,21 +88,24 @@ export default function InteractiveSheet()
     const currentPrepared = character?.spellsPrepared.filter((spell) => spell.level > 0).length;
     const canPrepareMore = (currentPrepared??0) < (character?.spellsPreparedNum ?? 1);
     const spellLevels = Array.from({ length: 10 }, (_, i) => i); // 0–9
-
+   
     if (isLoadingChar) return <p>Loading...</p>;
     if (isErrorChar || !character) return <p>Error loading character</p>;
     if (items?.length==0) return <p>Error loading items. Items array length is 0</p>;
 
     return <>
     <p>{character.name}</p>
-    <button onClick={handleItemButtonClick}>
+    <button onClick={handleItemButtonClick} className="btn">
       {showItems ? 'Hide Items' : 'Show Items'}
     </button>
-        <button onClick={handleInventoryButtonClick}>
-      {showItems ? 'Hide Inventory' : 'Show Inventory'}
+    <button onClick={handleInventoryButtonClick} className="btn">
+      {showInventory ? 'Hide Inventory' : 'Show Inventory'}
     </button>
     <button onClick={handleSpellsButtonClick} className="btn">
         {showSpells ? "Hide Available Spells" : "Show Available Spells"}
+    </button>
+    <button onClick={handleShowAttacksButtonClick} className="btn">
+      {showAttacks ? 'Hide Attacks' : 'Show Attacks'}
     </button>
     {isLoadingItems && <p>Loading Items...</p>}
     {isErrorItems && <p>Failed to load items.</p>}
@@ -75,15 +118,37 @@ export default function InteractiveSheet()
         </li>
       ))}
       </ul>)}
-      {showInventory && (
+    {showInventory && (
       <ul className="space-y-6">
-      {character.characterItems?.map((charItem: any) => (
-        <li key={charItem.item.id}>
-          <p>{charItem.item.name}</p>
-          <p>{charItem.item.description}</p>
+      {character.characterItems?.map((charItem: Item) => (
+        <li key={charItem.id}>
+          <p>{charItem.name}</p>
+          <p>{charItem.description}</p>
+          <button onClick={()=>handleDeleteItemButtonClick(charItem.id)}>Delete Item</button>
         </li>
       ))}
       </ul>)}
+
+      {showAttacks && (
+        <ul className="space-y-6">
+          {attacksData?.map((attack: Attack) => (
+            <li key={attack.id}>
+              <EditableAttack
+                attack={attack}
+                onSave={async (updated) => {
+                  try {
+                    await updateAttacks({ attack: updated });
+                    await refetchAttacks();
+                    await refetchCharacter();
+                  } catch (err) {
+                    console.error("Error updating attack:", err);
+                  }
+                }}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
       {showSpells && (
         <div className="space-y-4">
           <h2 className="font-bold text-lg">Available Spells</h2>
@@ -95,7 +160,10 @@ export default function InteractiveSheet()
               <button
                 className="btn mt-2"
                 onClick={() =>
-                learnSpell({ charId: character.id, spellId: spell.id }).then(() => router.reload())
+                  learnSpell({ charId: character.id, spellId: spell.id }).then(() => {
+                    refetchCharacter();
+                    refetchAvailableSpells();
+                  })
                 }
               >
                 Prepare
@@ -156,9 +224,8 @@ export default function InteractiveSheet()
                       <button
                         className="btn"
                         onClick={() =>
-                          unprepareSpell({ charId: character.id, spellId: spell.id }).then(() =>
-                            router.reload()
-                          )
+                          unprepareSpell({ charId: character.id, spellId: spell.id })
+                            .then(() => refetchCharacter())
                         }
                       >
                         Unprepare
@@ -167,10 +234,10 @@ export default function InteractiveSheet()
                         <button
                           className="btn"
                           onClick={() =>
-                          SpellSlotMutation({ charId: Number(character.id), spellLevel: Number(level) })
-                            .then(() => router.reload())
-                            .catch((err) => console.error("Error using spell slot:", err))
-}
+                            SpellSlotMutation({ charId: Number(character.id), spellLevel: Number(level) })
+                              .then(() => refetchCharacter())
+                              .catch((err) => console.error("Error using spell slot:", err))
+                          }
                         >
                           Use
                         </button>
@@ -183,6 +250,14 @@ export default function InteractiveSheet()
           );
         })}
       </div>
+      <ul>
+                {character.feats.map((feat)=>(
+                  <li key={feat?.id}>
+                    <p>{feat?.name}</p>
+                    <p>{feat?.description}</p>
+                  </li>
+                ))}
+              </ul>
     </>
 
 }

@@ -262,18 +262,17 @@ model Character {
 }
 
 model Attack {
-    id Int @id
+    id Int @id @default(autoincrement())
     name String 
     toHitBonus Int 
     notes String 
-    //example: if damageDiceNums=[2,1] and damageDiceTypes=[4,12] and damageTypes=["piercing", "acid"]
-    //then it's 2d4 Piercing + 1d12 Acid damage
     damageDice Json //example: {"num": 1, "type": 6},
-    damageTypes String[] //slashing, piercing, acid etc
+    damageTypes String @default("Piercing") //slashing, piercing, acid etc
     ability Ability 
     addProfBonus Boolean 
     additionalModifier Int? 
-    Character Character[]
+    Character Character @relation(fields: [Characterid], references: [id], onDelete: Cascade)
+    Characterid Int @default(1)
 }
 
 model CharacterWeaponProficiency {

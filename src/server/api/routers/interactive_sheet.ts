@@ -1,6 +1,48 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { SpellcastingType } from "@prisma/client";
+import { Ability, SpellcastingType } from "@prisma/client";
+import { Albert_Sans } from "next/font/google";
+
+
+
+// const AttackSchema = z.object({
+//   id: z.number().int(),
+//   name: z.string().min(1),
+//   toHitBonus: z.number().int(),
+//   notes: z.string(),
+//   damageDice: DamageDiceSchema, 
+//   damageTypes: z.string().min(1),
+//   ability: AbilityEnum,
+//   addProfBonus: z.boolean(),
+//   additionalModifier: z.number().int().optional(),
+//   Characterid: z.number().int(),
+
+const AbilityToIndex = (ability: Ability) => {
+  switch (ability) {
+    case Ability.Strength:
+      return 0;
+    break;
+    case Ability.Dexterity:
+      return 1;
+    break;
+    case Ability.Constitution:
+      return 2;
+    break;
+    case Ability.Intelligence:
+      return 3;
+    break;
+    case Ability.Wisdom:
+      return 4;
+    break;
+    case Ability.Charisma:
+      return 5;
+    break;
+    default:
+      return 0;
+      break;
+  }
+}
+
 
 export const interactiveSheetRouter = createTRPCRouter({
     getCharacter: publicProcedure
@@ -44,15 +86,59 @@ export const interactiveSheetRouter = createTRPCRouter({
     addItem: publicProcedure
       .input(z.object({ charId: z.number(), itemId: z.number() }))
       .mutation(async ({ ctx, input }) => {
+        const item = await ctx.prisma.item.findUnique({
+          where: { id: input.itemId },
+        });
+
+        if (!item) {
+          throw new Error("Item not found");
+        }
+
+        const characterUpdateData: any = {
+          characterItems: {
+            connect: { id: input.itemId },
+          },
+        };
+
+        if (item.isWeapon) {
+          const attack = await ctx.prisma.attack.create({
+            data: {
+              name: item.name,
+              toHitBonus: 0, 
+              notes: item.description,
+              damageDice: item.damageDice ?? { num: 1, type: 6 },
+              damageTypes: item.damageType ?? "Slashing",
+              ability: Ability.Strength, 
+              addProfBonus: true,
+              additionalModifier: 0,
+              Character: {
+                connect: { id: input.charId },
+              },
+            },
+          });
+          const characterUpdateWeapon: any = {
+          attacks: {
+            connect: { id: attack.id },
+          },
+          };
+          ctx.prisma.character.update({
+          where: { id: input.charId },
+          data: characterUpdateWeapon,
+        });
+
+        }
+
         return ctx.prisma.character.update({
           where: { id: input.charId },
-          data: {
-            characterItems: {
-              connect: { id: input.itemId },
-            },
-          },
+          data: characterUpdateData,
         });
       }),
+
+    deleteItem: publicProcedure
+    .input(z.object({itemId: z.number()}))
+    .mutation(async ({ctx,input})=>{
+      return await ctx.prisma.item.delete({where: {id: input?.itemId}});
+    }),
 
     getAvailableSpells: publicProcedure
     .input(z.object({ charId: z.number() }))
@@ -181,7 +267,7 @@ export const interactiveSheetRouter = createTRPCRouter({
       }),
 
 
-      prepareSpell: publicProcedure
+    prepareSpell: publicProcedure
       .input(z.object({ charId: z.number(), spellId: z.number() }))
       .mutation(async ({ ctx, input }) => {
         const char = await ctx.prisma.character.findUnique({
@@ -203,7 +289,6 @@ export const interactiveSheetRouter = createTRPCRouter({
         const alreadyPrepared = char.spellsPrepared.some((s) => s.id === spell.id);
         if (alreadyPrepared) throw new Error("Spell already prepared");
 
-        // Only check limit for non-cantrips
         if (spell.level > 0) {
           const nonCantripPreparedCount = char.spellsPrepared.filter((s) => s.level > 0).length;
           if (nonCantripPreparedCount >= (char?.spellsPreparedNum??0)) {
@@ -211,7 +296,7 @@ export const interactiveSheetRouter = createTRPCRouter({
           }
         }
         const knownCantripsCount = char.spellsKnown.filter(s => s.level === 0).length;
-        if ((char.knownCantripsNum ?? 0)  <= knownCantripsCount){
+        if ((char.knownCantripsNum ?? 0)  <= knownCantripsCount && spell.level==0){
           throw new Error("Cannot learn (prepare) more cantrips");
         }
 
@@ -225,7 +310,7 @@ export const interactiveSheetRouter = createTRPCRouter({
         });
       }),
 
-      unprepareSpell: publicProcedure
+    unprepareSpell: publicProcedure
         .input(z.object({ charId: z.number(), spellId: z.number() }))
         .mutation(async ({ ctx, input }) => {
           const char = await ctx.prisma.character.findUnique({
@@ -269,5 +354,75 @@ export const interactiveSheetRouter = createTRPCRouter({
         });
       }),
 
+    getCharAttacks: publicProcedure
+      .input(z.object({ charId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const character = await ctx.prisma.character.findUnique({
+          where: { id: input.charId },
+          select: {
+            abilityScores: true,
+            proficiencyBonus: true,
+          },
+        });
+
+        if (!character) throw new Error("Character not found");
+
+        const attacks = await ctx.prisma.attack.findMany({
+          where: { Characterid: input.charId },
+        });
+
+        const AbilityToIndex = (ability: Ability): number => {
+          return {
+            Strength: 0,
+            Dexterity: 1,
+            Constitution: 2,
+            Intelligence: 3,
+            Wisdom: 4,
+            Charisma: 5,
+          }[ability];
+        };
+
+        const updatedAttacks = await Promise.all(
+          attacks.map(async (attack) => {
+            const abilityIndex = AbilityToIndex(attack.ability);
+            const abilityScore = character.abilityScores[abilityIndex] ?? 10;
+            const abilityBonus = Math.floor((abilityScore - 10) / 2);
+            const profBonus = attack.addProfBonus ? character.proficiencyBonus ?? 0 : 0;
+            const newToHitBonus = abilityBonus + profBonus;
+
+            return await ctx.prisma.attack.update({
+              where: { id: attack.id },
+              data: {
+                toHitBonus: newToHitBonus,
+              },
+            });
+          })
+        );
+
+        return updatedAttacks;
+      }),
+
+
+    updateAttacks: publicProcedure
+      .input(z.object({
+        attack: z.object({
+          id: z.number(),
+          name: z.string(),
+          toHitBonus: z.number(),
+          notes: z.string(),
+          damageDice: z.any(), // could add a stricter z.object if desired
+          damageTypes: z.string(),
+          ability: z.nativeEnum(Ability),
+          addProfBonus: z.boolean(),
+          additionalModifier: z.number().nullable(),
+          Characterid: z.number(),
+        }),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return await ctx.prisma.attack.update({
+          where: { id: input.attack.id },
+          data: input.attack,
+        });
+      }),
 
 });
