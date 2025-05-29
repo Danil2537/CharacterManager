@@ -71,22 +71,15 @@ export default function Home() {
       <main className="min-h-screen text-black">
         <header className="dark:bg-gray-800 dark:text-white shadow-md">
           <nav className="justify-start flex m-auto items-center ml-30 pt-3 mr-30 pb-2">
-            <a className="mr-10" href="#">
+            <Link className="mr-10" href="/">
               <img src="/favicon.ico" alt="" />
-            </a>
-            <a className="flex items-center p-2 mr-10 border-1 border-solid rounded-lg shadow-md hover:bg-white hover:text-black hover:transition duration-400 ease-in-out" href="">
+            </Link>
+            <Link className="flex items-center p-2 mr-10 border-1 border-solid rounded-lg shadow-md hover:bg-white hover:text-black hover:transition duration-400 ease-in-out" href="/">
               <svg className="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="white">
               <path d="M19 3H14.82C14.4 1.84 13.3 1 12 1C10.7 1 9.6 1.84 9.18 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM12 2.75C12.22 2.75 12.41 2.85 12.55 3C12.67 3.13 12.75 3.31 12.75 3.5C12.75 3.91 12.41 4.25 12 4.25C11.59 4.25 11.25 3.91 11.25 3.5C11.25 3.31 11.33 3.13 11.45 3C11.59 2.85 11.78 2.75 12 2.75ZM19 19H5V5H19V19ZM12 6C10.35 6 9 7.35 9 9C9 10.65 10.35 12 12 12C13.65 12 15 10.65 15 9C15 7.35 13.65 6 12 6ZM6 16.47V18H18V16.47C18 13.97 14.03 12.89 12 12.89C9.97 12.89 6 13.96 6 16.47Z" fill="inherit"></path>
               </svg>
               <span className="pl-2">Мої персонажі</span>
-            </a>
-            <a className="flex items-center p-2 mr-10 border-1 border-solid rounded-lg shadow-md hover:bg-white hover:text-black hover:transition duration-400 ease-in-out" href="">
-              <svg className="fill-current" viewBox="0 0 24 24" fill="white" width="18px" height="18px">
-              <path d="M0 0h24v24H0V0z" fill="none"></path>
-              <path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path>
-              </svg>
-              <span className="pl-2">Про нас</span>
-            </a>
+            </Link>
               <SignedOut>
               <SignInButton>
               <button className="flex items-center ml-auto cursor-pointer">
@@ -258,18 +251,18 @@ export default function Home() {
           <div className="flex mr-[20px] pt-[40px] pb-[80px] ml-[100px] m-auto text-white">
             <div className="flex flex-wrap items-center max-w[320px] flex-col items-start justify-start ml-0 mr-[60px] mt-0 mb-0 w-auto">
             <p className="text-left text-[12px] font-bold leading-[16px] tracking-[1px] mb-[4px] uppercase w-[100%] text-[#a3a3a3]">Рубрикатор</p>
-            <a className="text-[14px] leading-[30px] hover: transition opacity .1s hover:text-[#878787]" href="#">Головна</a>
-            <a className="text-[14px] leading-[30px] hover: transition opacity .1s hover:text-[#878787]" href="#">Лист персонажа</a>
-            <a className="text-[14px] leading-[30px] hover: transition opacity .1s hover:text-[#878787]" href="#">О нас</a>
+            <Link className="text-[14px] leading-[30px] hover: transition opacity .1s hover:text-[#878787]" href="/">Головна</Link>
+            <Link className="text-[14px] leading-[30px] hover: transition opacity .1s hover:text-[#878787]" href="/">Лист персонажа</Link>
             </div>
             <div className="flex flex-wrap items-center max-w[320px] flex-col items-start justify-start ml-0 mr-[60px] mt-0 mb-0 w-auto">
               <p className="text-left text-[12px] font-bold leading-[16px] tracking-[1px] mb-[4px] uppercase w-[100%] text-[#a3a3a3]">Соціальні мережі</p>
-              <a className="text-[14px] leading-[30px] hover: transition opacity .1s hover:text-[#878787]" href="#">Telegram</a>
-              <a className="text-[14px] leading-[30px] hover: transition opacity .1s hover:text-[#878787]" href="#">Discord</a>
+              <Link className="text-[14px] leading-[30px] hover: transition opacity .1s hover:text-[#878787]" href="#">Telegram</Link>
+              <Link className="text-[14px] leading-[30px] hover: transition opacity .1s hover:text-[#878787]" href="#">Discord</Link>
+              <Link className="text-[14px] leading-[30px] hover: transition opacity .1s hover:text-[#878787]" href="#">Instagram</Link>
             </div>
             <div className="flex flex-wrap items-center max-w[320px] flex-col items-start justify-start ml-0 mr-[60px] mt-0 mb-0 w-auto">
               <p className="text-left text-[12px] font-bold leading-[16px] tracking-[1px] mb-[4px] uppercase w-[100%] text-[#a3a3a3]">Підтримати</p>
-              <a className="text-[14px] text-[#f15f2c] leading-[25px] hover: transition opacity .1s hover:text-[#878787]" href="">Boosty</a>
+              <Link className="text-[14px] text-[#f15f2c] leading-[25px] hover: transition opacity .1s hover:text-[#878787]" href="#">DonatePay</Link>
             </div>
           </div>
           <div className="flex bg-[#1e1d3b] p-[11px]">
@@ -283,12 +276,6 @@ export default function Home() {
           </div>
         </footer>
         </main>
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 hidden">
-
-          {/* <Link href="creation" className="bg-white text-black px-4 py-2 rounded">
-            Create a Character
-          </Link> */}
-        </div>
       </main>
     </>
   );
