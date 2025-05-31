@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { api } from "../../utils/api";
-import type { Attack, Item, Spell } from "@prisma/client";
+import type { Attack, Class, Item, Spell } from "@prisma/client";
 import {Ability} from "@prisma/client"
 import {useEffect, useState} from "react";
 import React from "react";
@@ -41,6 +41,25 @@ export default function InteractiveSheet()
       isError: isErrorAttacks,
       refetch: refetchAttacks
     } = api.interactiveSheet.getCharAttacks.useQuery({charId: Number(charId)}, { enabled });
+
+
+    const { data: classes,  isLoading: isLoadingClasses,
+      isError: isErrorClasses, } = api.interactiveSheet.getAllClasses.useQuery();
+
+    const { mutateAsync: levelUpMutation } = api.interactiveSheet.levelUp.useMutation();
+
+    const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
+
+    const handleLevelUp = async () => {
+      if (!character?.id || !selectedClassId) return;
+
+      try {
+        await levelUpMutation({ charId: character.id, leveledClassId: selectedClassId });
+        await refetchCharacter();
+      } catch (err) {
+        console.error("Level up failed:", err);
+      }
+    }
     
     const { mutateAsync: addItem } = api.interactiveSheet.addItem.useMutation();
     const {mutateAsync: deleteItem} = api.interactiveSheet.deleteItem.useMutation();
@@ -258,6 +277,33 @@ export default function InteractiveSheet()
                   </li>
                 ))}
               </ul>
+    <div className="my-6 p-4 border rounded-md">
+  <h2 className="font-bold text-lg mb-2">Level Up</h2>
+  {isLoadingClasses && <p>Loading classes...</p>}
+  {isErrorClasses && <p>Error loading classes.</p>}
+  {classes && (
+    <>
+      <select
+        className="border p-2 rounded w-full max-w-xs"
+        value={selectedClassId ?? ""}
+        onChange={(e) => setSelectedClassId(Number(e.target.value))}
+      >
+        <option value="" disabled>Select a class</option>
+        {classes.map((cls:Class) => (
+          <option key={cls.id} value={cls.id}>
+            {cls.name}
+          </option>
+        ))}
+      </select>
+      <button
+        onClick={handleLevelUp}
+        className="btn ml-4"
+        disabled={!selectedClassId}
+      >
+        Level Up
+      </button>
     </>
-
+  )}
+</div>
+    </>
 }

@@ -94,7 +94,7 @@ export const creationRouter = createTRPCRouter({
       let knownCantripsNum: number | undefined;
 
       if (chosenClass.grantsSpellcasting) {
-        spellAbility = chosenClass.primaryAbility;
+        spellAbility = chosenClass.spellAbility;
 
         if (chosenClass.spellSlots) {
           const spellSlotsMatrix = chosenClass.spellSlots as number[][];

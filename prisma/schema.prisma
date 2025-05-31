@@ -167,7 +167,7 @@ model Character {
     //Character can have "proficiencies" with a number of skills;
     //The list of skills is always the same for all character and is contained in Skills enum; 
     //The skillProfs just shows which skill checks should add proficiencyBonus to the result of the dice roll
-    skillProfs    Skill[]
+    skillProfs    Skill[] //someday update this on level up
     skillExpertices Skill[] //some classes and features gran double proficiency to some skills. 
     //Similar to skills, the list of saving throws is always the same, and it is the list of 6 abilities.
     //The savingThrows field just contains which saving throws get to add proficiencyBonus to rolls
@@ -294,6 +294,7 @@ model Class {
     name String @default("Unknown")
     description String 
     primaryAbility Ability 
+    spellAbility Ability @default(Intelligence)
     hitDiceType Int 
     saveProfs Ability[] //always two abilities
     skillProfsNum Int //how many skill proficiencies this class grants
@@ -306,6 +307,7 @@ model Class {
     //subclasses Subclass[]
     grantsSpellcasting Boolean
     spellcastingType SpellcastingType?
+    spellcastingLevel Int @default(0) //0 for non-mages, 1 for fighter/rouge mages, 2 for palading/rangers and other half-casters, 3 for full-casters 
     spellsList Spell[] 
     grantedSpells GrantedSpell[] @relation("ClassGrants")
     knownCantripsNum Int[] //how many cantrips character "knows". Cantrips are lvl0 spells, that don't require spell slots to use
