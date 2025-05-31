@@ -527,7 +527,7 @@ export const interactiveSheetRouter = createTRPCRouter({
     levelUp: publicProcedure
       .input(z.object({ charId: z.number(), leveledClassId: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        let character = await ctx.prisma.character.findUnique({
+        const character = await ctx.prisma.character.findUnique({
           where: { id: input.charId },
           include: { characterClasses: {include: {feats: true,}}, feats: true, species: {include: {feats: true}}, background: {include: {feats: true}}, weaponProficiencies: true },
         });
@@ -619,7 +619,7 @@ export const interactiveSheetRouter = createTRPCRouter({
           .map((cls, index) => ({ cls, index }))
           .filter(({ cls }) => cls.grantsSpellcasting);
         if(spellcastingClasses.length>1) {
-          let spellLevel = calculateMultiClassSpellSlotLevel(character?.characterClasses, character?.classLevels);
+          const spellLevel = calculateMultiClassSpellSlotLevel(character?.characterClasses, character?.classLevels);
           character.spellSlots = (multiclassSpellSlots[spellLevel-1]??[]);
 
           character.spellsPreparedNum = spellcastingClasses.reduce((sum, { cls, index }) => {
