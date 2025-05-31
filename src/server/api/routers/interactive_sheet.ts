@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { Ability, Skill, SpellcastingType, type Class } from "@prisma/client";
+import { Ability, Skill, SpellcastingType, type Class, type Spell } from "@prisma/client";
 
 const multiclassSpellSlots = [
 [2, 0, 0, 0, 0, 0, 0, 0, 0], 
@@ -151,68 +151,65 @@ export const interactiveSheetRouter = createTRPCRouter({
     }),
 
     getAvailableSpells: publicProcedure
-    .input(z.object({ charId: z.number() }))
-    .query(async ({ ctx, input }) => {
-      const char = await ctx.prisma.character.findFirst({
-        where: { id: input.charId },
-        include: {
-          characterClasses: {include: {spellsList: true}},
-          spellsKnown: true,
-        },
-      });
+      .input(z.object({ charId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const char = await ctx.prisma.character.findFirst({
+          where: { id: input.charId },
+          include: {
+            characterClasses: {
+              include: {
+                spellsList: true,
+              },
+            },
+            spellsKnown: true,
+          },
+        });
 
-      if (!char) throw new Error("Character not found");
-      const isZero = (element:number) => element == 0;
-      const highestSpellLevel = char.spellSlots.findIndex(isZero);
-      console.log(`\n\n\n\n\nHighest spell level: ${highestSpellLevel}\n\n\n\n\n`);
-      const newKnownSpells: number[] = [];
+        if (!char) throw new Error("Character not found");
 
-      for (const charClass of char.characterClasses) {
-        const classData = charClass;
-        if (!classData) continue;
-        
-        const relevantSpells = classData.spellsList.filter(
-          (spell) => spell.level <= highestSpellLevel
-        );
+        const highestSpellLevel = char.spellSlots.findIndex((slot) => slot === 0);
+        //const usableSpellLevel = highestSpellLevel === -1 ? 9 : highestSpellLevel - 1;
+        const knownSpellIds = new Set(char.spellsKnown.map((s:Spell) => s.id));
+        const availableSpells: typeof char.spellsKnown = [];
+        const divineSpellIdsToConnect: number[] = [];
 
-        if (classData.spellcastingType === SpellcastingType.Divine) {
-          for (const spell of relevantSpells) {
-            const alreadyKnown = char.spellsKnown.some((s) => s.id === spell.id);
-            if (!alreadyKnown) {
-              newKnownSpells.push(spell.id);
+        for (const cls of char.characterClasses) {
+          for (const spell of cls.spellsList) {
+            const shouldInclude =
+              spell.level <= highestSpellLevel && !knownSpellIds.has(spell.id);
+
+            if (shouldInclude) {
+              availableSpells.push(spell);
+
+              if (cls.spellcastingType === SpellcastingType.Divine) {
+                char.spellsKnown.push(spell);
+                knownSpellIds.add(spell.id);
+                divineSpellIdsToConnect.push(spell.id);
+              }
             }
           }
         }
-      }
 
-      // Connect new Divine class spells to the character
-      if (newKnownSpells.length > 0) {
-        await ctx.prisma.character.update({
-          where: { id: input.charId },
-          data: {
-            spellsKnown: {
-              connect: newKnownSpells.map((id) => ({ id })),
+        // Persist newly known Divine spells to DB if any
+        if (divineSpellIdsToConnect.length > 0) {
+          await ctx.prisma.character.update({
+            where: { id: char.id },
+            data: {
+              spellsKnown: {
+                connect: divineSpellIdsToConnect.map((id) => ({ id })),
+              },
             },
-          },
-        });
-      }
+          });
+        }
 
-      // Re-fetch the updated character to return available spells
-      const updatedChar = await ctx.prisma.character.findFirst({
-        where: { id: input.charId },
-        include: {
-          characterClasses: { include: { spellsList: true } }
-        },
-      });
+        const uniqueAvailableSpells = Array.from(
+          new Map(availableSpells.map((spell) => [spell.id, spell])).values()
+        );
 
-      const availableSpells = updatedChar?.characterClasses.flatMap((charClass) =>
-        charClass?.spellsList.filter(
-          (spell) => spell.level <= highestSpellLevel
-        )
-      ) ?? [];
+        console.log(`\n\n\nAvailable Spells: ${JSON.stringify(uniqueAvailableSpells)}\n\n\n`);
 
-      return availableSpells;
-    }),
+        return uniqueAvailableSpells;
+      }),
     
     learnSpell: publicProcedure
     .input(z.object({ charId: z.number(), spellId: z.number() }))
@@ -520,7 +517,7 @@ export const interactiveSheetRouter = createTRPCRouter({
 
       getAllClasses: publicProcedure.query(async ({ ctx }) => {
         const classes = await ctx.prisma.class.findMany({ include: { feats: true, startingEquipment: true } });
-        console.log("Fetched classes", JSON.stringify(classes, null, 2));
+        //console.log("Fetched classes", JSON.stringify(classes, null, 2));
         return classes;
       }),
 
@@ -569,7 +566,7 @@ export const interactiveSheetRouter = createTRPCRouter({
 
         const index = character.characterClasses.findIndex((cls) => cls.id === input.leveledClassId);
         type HitDie = { num: number; faces: number };
-        character.classLevels = [...character.classLevels];
+        //character.classLevels = [...character.classLevels];
         const updatedHitDice = Array.isArray(character.hitDice) ? [...(character.hitDice as HitDie[])] : [];
         character.maxHitPoints = (character?.maxHitPoints??0)+Math.floor(Math.random() * (leveledClass?.hitDiceType - 1) + 1)+(character?.abilityScores[2]??0);
         if (index !== -1) {
@@ -593,8 +590,8 @@ export const interactiveSheetRouter = createTRPCRouter({
           });
         }
         character.hitDice = updatedHitDice;
-        character.level = character.classLevels.reduce((sum, lvl) => sum + lvl, 0);
-
+        //character.level = character.classLevels.reduce((sum, lvl) => sum + lvl, 0);
+        character.level+=1;
         const levelMatches = (feat: { gainedAtLevel: number | null }) =>
           (feat.gainedAtLevel ?? 1) === character.level;
 
@@ -639,7 +636,7 @@ export const interactiveSheetRouter = createTRPCRouter({
           const spellAbilityIndex = abilityIndexMap[spellcastingClasses.at(0)?.cls.spellAbility??Ability.Intelligence];
           const spellScore = character.abilityScores[spellAbilityIndex];
           character.spellSaveDC =  8 + Math.floor(((spellScore??12) - 10) / 2) + (character.proficiencyBonus??2);
-
+          character.spellAbility = (spellcastingClasses?.at(0)?.cls.spellAbility??Ability.Intelligence);
         }
         else if(spellcastingClasses.length==1) {
           const spellcastingClass = character?.characterClasses.find(cls=> cls.grantsSpellcasting==true);
@@ -653,14 +650,15 @@ export const interactiveSheetRouter = createTRPCRouter({
           const spellAbilityIndex = abilityIndexMap[(spellcastingClass?.spellAbility??Ability.Intelligence)];
           const spellScore = character.abilityScores[spellAbilityIndex];
           character.spellSaveDC =  8 + Math.floor(((spellScore??12) - 10) / 2) + (character.proficiencyBonus??2);
+          character.spellAbility = (spellcastingClass?.spellAbility??Ability.Intelligence);
         }
 
-
+        character.hitDice = character.hitDice.filter((hd): hd is { num: number; faces: number } => hd !== undefined);
         await ctx.prisma.character.update({
           where: { id: input.charId },
           data: {
             classLevels: character.classLevels,
-            hitDice: updatedHitDice,
+            hitDice: character.hitDice,
             maxHitPoints: character.maxHitPoints,
             characterClasses: {
               connect: index === -1 ? { id: input.leveledClassId } : undefined,

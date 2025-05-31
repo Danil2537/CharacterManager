@@ -185,7 +185,7 @@ export default function InteractiveSheet()
                 }
                 }
               >
-                Prepare
+                Learn
               </button>
             </div>
           ))}

@@ -11,6 +11,7 @@ TODO: [done_bards] test spell selection for wizards and bards
 TODO: [done_backend] long rest button to recover hp, spell slots and exhaustion (nothing else probably)
 TODO: [done_buggy] level up functionality, probably as separate page
 TODO: [done] check if char feats are loaded correctly
-TODO: [] add feat selection and adding/deleting them to char
+TODO: [rejected] add feat selection and adding/deleting them to char
 TODO: [] add abililty score editing
-TODO: check domain spells
+TODO: [] check domain spells
+TODO: [] check why classLevels are bigger than level
