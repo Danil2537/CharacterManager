@@ -24,7 +24,7 @@ export const creationRouter = createTRPCRouter({
   getAllSpecies: publicProcedure.query(async ({ ctx }) => {
     const species = await ctx.prisma.species.findMany({ include: { feats: true, grantedSpells: true } });
     //console.log("Fetched Species: ", JSON.stringify(species, null, 2));
-    species.forEach((sp)=>console.log(`\n\n\nSpecies spells: ${sp.grantedSpells}\n\n\n`));
+    //species.forEach((sp)=>console.log(`\n\n\nSpecies spells: ${sp.grantedSpells}\n\n\n`));
     return species;
   }),
 
