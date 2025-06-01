@@ -89,11 +89,11 @@ export default function InteractiveSheet()
       .catch(err => console.error("Error deleting item (client): ",err));
     };
     const handleShowAttacksButtonClick = () => {setShowAttacks(!showAttacks);};
-    const handleAddAttackButtonClick = (charid: number) => {
+    const handleAddAttackButtonClick = async (charid: number) => {
               if (!localAttacks) return;
-              addAttack({charId: charid});
+              await addAttack({charId: charid});
               //localAttacks?.push(newAttack);
-              refetchAttacks();
+              await refetchAttacks();
     };
     const {
       data: availableSpells,
