@@ -64,6 +64,14 @@ export default function InteractiveSheet()
     const { mutateAsync: addItem } = api.interactiveSheet.addItem.useMutation();
     const {mutateAsync: deleteItem} = api.interactiveSheet.deleteItem.useMutation();
     const {mutateAsync: updateAttacks} = api.interactiveSheet.updateAttacks.useMutation();
+    const {mutateAsync: addAttack} = api.interactiveSheet.createAttack.useMutation();
+    const {mutateAsync: deleteAttack} = api.interactiveSheet.deleteAttack.useMutation();
+    const [localAttacks, setLocalAttacks] = useState<Attack[] | undefined>(attacksData);
+    useEffect(() => {
+      setLocalAttacks(attacksData);
+    }, [attacksData]);
+
+    
     const [showItems, setShowItems] = useState(false);
     const handleItemButtonClick = () =>{setShowItems(!showItems);};
     const [showInventory, setShowInventory] = useState(false);
@@ -81,6 +89,12 @@ export default function InteractiveSheet()
       .catch(err => console.error("Error deleting item (client): ",err));
     };
     const handleShowAttacksButtonClick = () => {setShowAttacks(!showAttacks);};
+    const handleAddAttackButtonClick = (charid: number) => {
+              if (!localAttacks) return;
+              addAttack({charId: charid});
+              //localAttacks?.push(newAttack);
+              refetchAttacks();
+    };
     const {
       data: availableSpells,
       refetch: refetchAvailableSpells
@@ -148,7 +162,7 @@ export default function InteractiveSheet()
       ))}
       </ul>)}
 
-      {showAttacks && (
+      {/* {showAttacks && (
         <ul className="space-y-6">
           {attacksData?.map((attack: Attack) => (
             <li key={attack.id}>
@@ -167,7 +181,55 @@ export default function InteractiveSheet()
             </li>
           ))}
         </ul>
-      )}
+      )} */}
+      {showAttacks && (
+  <div className="space-y-4">
+    <div className="flex gap-2">
+    <button
+            className="btn btn-sm px-3"
+            onClick={()=>handleAddAttackButtonClick(character.id)}
+          >
+            +
+          </button>
+
+      <button
+        className="btn btn-sm px-3"
+        onClick={async () => {
+          if (!localAttacks || localAttacks.length === 0) return;
+          const lastAttack = localAttacks[localAttacks.length - 1];
+          try {
+            await deleteAttack({ attackId: (lastAttack?.id??0) });
+            await refetchAttacks();
+            await refetchCharacter();
+          } catch (err) {
+            console.error("Error deleting attack:", err);
+          }
+        }}
+      >
+        -
+      </button>
+    </div>
+
+    <ul className="space-y-6">
+      {localAttacks?.map((attack: Attack) => (
+        <li key={attack.id}>
+          <EditableAttack
+            attack={attack}
+            onSave={async (updated) => {
+              try {
+                await updateAttacks({ attack: updated });
+                await refetchAttacks();
+                await refetchCharacter();
+              } catch (err) {
+                console.error("Error updating attack:", err);
+              }
+            }}
+          />
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
       {showSpells && (
         <div className="space-y-4">
           <h2 className="font-bold text-lg">Available Spells</h2>

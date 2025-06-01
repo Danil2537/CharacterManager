@@ -75,17 +75,17 @@ enum Language {
     Undercommon
 }
 
-enum Alignment {
-    LawfulGood
-    LawfulNeutral
-    LawfulEvil
-    NeutralGood
-    NeutralNeutral
-    NeutralEvil
-    ChaoticGood
-    ChaoticNeutral
-    ChaoticEvil
-}
+// enum Alignment {
+//     LawfulGood
+//     LawfulNeutral
+//     LawfulEvil
+//     NeutralGood
+//     NeutralNeutral
+//     NeutralEvil
+//     ChaoticGood
+//     ChaoticNeutral
+//     ChaoticEvil
+// }
 
 enum WeaponProperty {
     Simple
@@ -238,7 +238,7 @@ model Character {
     // //subclasses grant unique features, on certain levels
     // subclassID    Int?
     // subclass  Subclass? @relation("CharacterSubclass", fields: [subclassID], references: [id])
-    alignment Alignment @default(LawfulGood) //This is the "lawful good", "chaotic neutral" etc thing; Doesn't really have mechanical impact;
+    //alignment Alignment @default(LawfulGood) //This is the "lawful good", "chaotic neutral" etc thing; Doesn't really have mechanical impact;
     //characterItems CharacterItems[]
     characterItems Item[]
     passivePerception Int //Passive Perception = 10 + Wisdom (Perception) check modifier
@@ -309,7 +309,7 @@ model Class {
     spellcastingType SpellcastingType?
     spellcastingLevel Int @default(0) //0 for non-mages, 1 for fighter/rouge mages, 2 for palading/rangers and other half-casters, 3 for full-casters 
     spellsList Spell[] 
-    grantedSpells GrantedSpell[] @relation("ClassGrants")
+    //grantedSpells GrantedSpell[] @relation("ClassGrants")
     knownCantripsNum Int[] //how many cantrips character "knows". Cantrips are lvl0 spells, that don't require spell slots to use
     //example spell slots for cleric: spellSlots: 
     // [[2,0,0,0,0,0,0,0,0],
@@ -334,6 +334,7 @@ model Class {
     // [4,3,3,3,3,2,2,1,1]]
     spellSlots Json? 
     spellsPrepared Int[]
+    grantedSpells GrantedSpell[]
 }
 
 // model CharacterClasses {
@@ -356,7 +357,8 @@ model Species {
     speed Int 
     darkvision Int @default(0)//how far you see in the dark. If species don't have darkvision, it's 0
     description String 
-    grantedSpells GrantedSpell[] @relation("SpeciesGrants")
+    //grantedSpells GrantedSpell[] @relation("SpeciesGrants")
+    grantedSpells GrantedSpell[]
 }
 
 
@@ -387,7 +389,9 @@ model Background {
     gold Int @default(50)
     abilities Ability[] //size always 3
     toolProficiency Tool 
-    grantedSpells GrantedSpell[] @relation("BackgroundGrants")
+    // grantedSpells GrantedSpell[] @relation("BackgroundGrants")
+
+    grantedSpells GrantedSpell[]
 }
 
 
@@ -412,21 +416,27 @@ model Feat {
     diceProgression Json? //example: [{"num": 1, "type": 6}, {"num": 2, "type": 8}] 
     usageDice Json? //for feats with individual, not progressing dice usage
     //spentUses Int? TODO: somehow implement spendingn probably as some king of ui checkboxes
-    grantedSpells GrantedSpell[] @relation("FeatGrants")
+    grantedSpells GrantedSpell[]
 }
 
 model GrantedSpell {
   id Int @id @default(autoincrement())
   sourceType SourceType
   sourceId Int
-  spellId Int
+  //spellId Int
   level Int 
-  Class Class[] @relation("ClassGrants")
-  Spell Spell[] @relation("SpellGrants")
-  Species Species[] @relation("SpeciesGrants")
+  Classid Int?
+  Class Class? @relation(fields: [Classid], references: [id], onDelete: Cascade)
+  Spellid Int
+  Spell Spell @relation(fields: [Spellid], references: [id], onDelete: Cascade)
+  Speciesid Int?
+  Species Species? @relation(fields: [Speciesid], references: [id], onDelete: Cascade)
   //Subclass Subclass[] @relation("SubclassGrants")
-  Background Background[] @relation("BackgroundGrants")
-  Feat Feat[] @relation("FeatGrants")
+  Backgroundid Int?
+  Background Background? @relation(fields: [Backgroundid], references: [id], onDelete: Cascade)//@relation("BackgroundGrants")
+  //Feat Feat? //@relation("FeatGrants")
+  Featid Int?
+  Feat Feat? @relation(fields: [Featid], references: [id], onDelete: Cascade)
 }
 
 model Spell {
@@ -443,7 +453,8 @@ model Spell {
     components String //verbal, somatic and material, in different combinations. Usually represented as something like "V,S" or "V,S,M (material name, gold value)"
     isConcentration Boolean
     Class Class[]
-    GrantedSpell GrantedSpell[] @relation("SpellGrants")
+    //GrantedSpell GrantedSpell[] @relation("SpellGrants")
+    GrantedSpell GrantedSpell[]
 }
 
 // model CharacterItems {

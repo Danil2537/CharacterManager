@@ -2,7 +2,7 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { getAuth } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
-import { Alignment, Language, Skill, SpellcastingType } from "@prisma/client";
+import { Language, Skill, SpellcastingType } from "@prisma/client";
 import { Ability } from "@prisma/client"; 
 
 const abilityIndexMap: Record<Ability, number> = {
@@ -17,19 +17,20 @@ const abilityIndexMap: Record<Ability, number> = {
 export const creationRouter = createTRPCRouter({
   getAllClasses: publicProcedure.query(async ({ ctx }) => {
     const classes = await ctx.prisma.class.findMany({ include: { feats: true, startingEquipment: true } });
-    console.log("Fetched classes", JSON.stringify(classes, null, 2));
+    //console.log("Fetched classes", JSON.stringify(classes, null, 2));
     return classes;
   }),
 
   getAllSpecies: publicProcedure.query(async ({ ctx }) => {
     const species = await ctx.prisma.species.findMany({ include: { feats: true, grantedSpells: true } });
-    console.log("Fetched Species: ", JSON.stringify(species, null, 2));
+    //console.log("Fetched Species: ", JSON.stringify(species, null, 2));
+    species.forEach((sp)=>console.log(`\n\n\nSpecies spells: ${sp.grantedSpells}\n\n\n`));
     return species;
   }),
 
   getAllBackgrounds: publicProcedure.query(async ({ ctx }) => {
     const backgrounds = await ctx.prisma.background.findMany({ include: { feats: true, items: true, grantedSpells: true } });
-    console.log("Fetched Backgrounds: ", JSON.stringify(backgrounds, null, 2));
+    //console.log("Fetched Backgrounds: ", JSON.stringify(backgrounds, null, 2));
     return backgrounds;
   }),
 
@@ -56,12 +57,12 @@ export const creationRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const [chosenClass, chosenSpecies, chosenBackground, chosenEquipment] = await Promise.all([
-        ctx.prisma.class.findFirst({ where: { id: input.chosenClassId }, include: { spellsList: true, feats: true }}),
-        ctx.prisma.species.findFirst({ where: { id: input.chosenSpeciesId }, include: {feats: true}}),
-        ctx.prisma.background.findFirst({ where: { id: input.chosenBackgroundId }, include: {feats: true}}),
+        ctx.prisma.class.findFirst({ where: { id: input.chosenClassId }, include: { spellsList: true, feats: true, grantedSpells: {include: {Spell: true}} }}),
+        ctx.prisma.species.findFirst({ where: { id: input.chosenSpeciesId }, include: {feats: true, grantedSpells: {include: {Spell: true}}}}),
+        ctx.prisma.background.findFirst({ where: { id: input.chosenBackgroundId }, include: {feats: true, grantedSpells: {include: {Spell: true}}}}),
         ctx.prisma.item.findMany({ where: { id: { in: input.chosenEquipmentIds } } }),
       ]);
-
+      chosenBackground?.grantedSpells.forEach((spl)=>console.log(`Bg Spell: ${JSON.stringify(spl.Spell)}`));
       const { userId } = getAuth(ctx.req);
       if (!userId) {
         throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be logged in to create a character." });
@@ -148,6 +149,15 @@ export const creationRouter = createTRPCRouter({
         ...chosenBackground?.feats.map((f) => f.id) ?? [],
       ]));
 
+      const grantedSpellIds = Array.from(
+        new Set([
+          ...(chosenClass?.grantedSpells?.filter((s) => s.level === 1).map((s) => s.Spellid) ?? []),
+          ...(chosenSpecies?.grantedSpells?.filter((s) => s.level === 1).map((s) => s.Spellid) ?? []),
+          ...(chosenBackground?.grantedSpells?.filter((s) => s.level === 1).map((s) => s.Spellid) ?? []),
+        ])
+      ).map((id) => ({ id }));
+      console.log(`\n\n\nGranted Spells: ${JSON.stringify(grantedSpellIds)}\n\n\n`);
+
       const character = await ctx.prisma.character.create({
         data: {
           name: input.chosenName,
@@ -179,7 +189,7 @@ export const creationRouter = createTRPCRouter({
           level: 1,
           passivePerception: 10 + wisMod,
           carryingCapacity: carryingCapacity,
-          alignment: Alignment.LawfulGood,
+          // alignment: Alignment.LawfulGood,
           classLevels: [1],
           spellAbility,
           spellSlots,
@@ -195,6 +205,9 @@ export const creationRouter = createTRPCRouter({
           },
           feats: {
             connect: featIds.map((id) => ({ id })),
+          },
+          spellsKnown: {
+            connect: grantedSpellIds,
           },
         },
       });

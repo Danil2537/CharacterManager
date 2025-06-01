@@ -395,7 +395,7 @@ export const interactiveSheetRouter = createTRPCRouter({
             const abilityScore = character.abilityScores[abilityIndex] ?? 10;
             const abilityBonus = Math.floor((abilityScore - 10) / 2);
             const profBonus = attack.addProfBonus ? character.proficiencyBonus ?? 0 : 0;
-            const newToHitBonus = abilityBonus + profBonus;
+            const newToHitBonus = abilityBonus + profBonus + (attack?.additionalModifier??0);
 
             return await ctx.prisma.attack.update({
               where: { id: attack.id },
@@ -431,6 +431,24 @@ export const interactiveSheetRouter = createTRPCRouter({
           data: input.attack,
         });
       }),
+
+      createAttack: publicProcedure
+      .input(z.object({charId: z.number()}))
+      .mutation(async ({ctx,input})=>{
+          return await ctx.prisma.attack.create({data: {
+              name: "Default attack name",
+              toHitBonus: 0, 
+              notes: "",
+              damageDice: { num: 1, type: 6 },
+              damageTypes: "Slashing",
+              ability: Ability.Strength, 
+              addProfBonus: false,
+              additionalModifier: 0,
+              Character: {
+                connect: { id: input.charId },
+              },
+            },})
+        }),
 
       longRest: publicProcedure
       .input(z.object({charId: z.number()}))
@@ -526,11 +544,17 @@ export const interactiveSheetRouter = createTRPCRouter({
       .mutation(async ({ ctx, input }) => {
         const character = await ctx.prisma.character.findUnique({
           where: { id: input.charId },
-          include: { characterClasses: {include: {feats: true,}}, feats: true, species: {include: {feats: true}}, background: {include: {feats: true}}, weaponProficiencies: true },
-        });
+          include: { characterClasses: {include: {feats: true, grantedSpells: {include: {Spell: true}}}}, 
+          feats: true, 
+          species: {include: {feats: true, grantedSpells: {include: {Spell: true}}}}, 
+          background: {include: {feats: true, grantedSpells: {include: {Spell: true}}}}, 
+          weaponProficiencies: true,
+          spellsKnown: true,
+          spellsPrepared: true,
+        }});
         const leveledClass = await ctx.prisma.class.findUnique({
           where: { id: input.leveledClassId },
-          include: { feats: true,},
+          include: { feats: true, grantedSpells: {include: {Spell: true}}},
         });
         if (!leveledClass) {throw new Error("Class not found");}
         if (!character) throw new Error("Character not found");
@@ -570,7 +594,7 @@ export const interactiveSheetRouter = createTRPCRouter({
         const updatedHitDice = Array.isArray(character.hitDice) ? [...(character.hitDice as HitDie[])] : [];
         character.maxHitPoints = (character?.maxHitPoints??0)+Math.floor(Math.random() * (leveledClass?.hitDiceType - 1) + 1)+(character?.abilityScores[2]??0);
         if (index !== -1) {
-          if(character.classLevels[index]){character.classLevels[index]++;}
+          //if(character.classLevels[index]){character.classLevels[index]++;}
 
           if (updatedHitDice[index]) {
             updatedHitDice[index].num++;
@@ -653,6 +677,35 @@ export const interactiveSheetRouter = createTRPCRouter({
           character.spellAbility = (spellcastingClass?.spellAbility??Ability.Intelligence);
         }
 
+        // Initialize or reuse spellsKnown
+        const knownSpells = new Map<number, typeof character.spellsKnown[number]>();
+        (character.spellsKnown ?? []).forEach(spell => {
+          knownSpells.set(spell.id, spell);
+        });
+
+        // Add granted spells from species and background if level matches
+        [character.species, character.background].forEach(source => {
+          source?.grantedSpells?.forEach(gs => {
+            if (gs.level === character.level && gs.Spell && !knownSpells.has(gs.Spell.id)) {
+              knownSpells.set(gs.Spell.id, gs.Spell);
+            }
+          });
+        });
+
+        // Add granted spells from class if class level matches
+        const classLevelIndex = character.characterClasses.findIndex(cls => cls.id === input.leveledClassId);
+        const classLevel = character.classLevels[classLevelIndex] ?? 0;
+        leveledClass.grantedSpells?.forEach(gs => {
+          if (gs.level === classLevel && gs.Spell && !knownSpells.has(gs.Spell.id)) {
+            knownSpells.set(gs.Spell.id, gs.Spell);
+          }
+        });
+
+        // Apply final list to character.spellsKnown
+        character.spellsKnown = Array.from(knownSpells.values());
+
+
+
         character.hitDice = character.hitDice.filter((hd): hd is { num: number; faces: number } => hd !== undefined);
         await ctx.prisma.character.update({
           where: { id: input.charId },
@@ -671,7 +724,22 @@ export const interactiveSheetRouter = createTRPCRouter({
             spellsPreparedNum: character.spellsPreparedNum,
             spellSaveDC: character.spellSaveDC,
             currentSpellSlots: character.spellSlots,
+            spellsKnown: {
+              set: character.spellsKnown.map(spell => ({ id: spell.id })),
+            },
           },
         });
       }),
+
+    updateAbiliityScores: publicProcedure
+    .input(z.object({charId: z.number(), newScores: z.array(z.number())}))
+    .mutation(async ({ctx,input})=> {
+      return await ctx.prisma.character.update({where: {id: input.charId}, data: {abilityScores: input.newScores}});
+    }),
+
+    deleteAttack: publicProcedure
+    .input(z.object({attackId: z.number()}))
+    .mutation(async ({ctx,input})=> {
+      return await ctx.prisma.attack.delete({where: {id: input.attackId}});
+    }),
 });

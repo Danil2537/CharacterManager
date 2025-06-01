@@ -12,6 +12,8 @@ TODO: [done_backend] long rest button to recover hp, spell slots and exhaustion 
 TODO: [done_buggy] level up functionality, probably as separate page
 TODO: [done] check if char feats are loaded correctly
 TODO: [rejected] add feat selection and adding/deleting them to char
-TODO: [] add abililty score editing
-TODO: [] check domain spells
-TODO: [] check why classLevels are bigger than level
+TODO: [done_backend] add abililty score editing
+TODO: [done] check domain spells
+TODO: [done] check why classLevels are bigger than level
+TODO: [done] remove alignment
+TODO: [done] add/delete attacks

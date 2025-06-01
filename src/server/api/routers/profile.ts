@@ -98,7 +98,7 @@ cloneCharacter: publicProcedure
         level: orig.level,
         passivePerception: orig.passivePerception ?? Math.floor(((orig.abilityScores[4] ?? 10) - 10) / 2) + 10,
         carryingCapacity: orig.carryingCapacity ?? 100,
-        alignment: orig.alignment,
+        // alignment: orig.alignment,
         classLevels: orig.classLevels,
          characterClasses: {
           connect: orig.characterClasses.map((cls) => ({ id: cls.id })),
@@ -206,7 +206,7 @@ importCharacter: publicProcedure
         level: orig?.level,
         passivePerception: orig?.passivePerception,
         carryingCapacity: orig?.carryingCapacity ?? 100,
-        alignment: orig?.alignment,
+        // alignment: orig?.alignment,
         classLevels: orig?.classLevels,
         characterClasses: {
           connect: orig.characterClasses.map((cls: Class) => ({ id: cls.id })),
