@@ -736,7 +736,7 @@ levelUp: publicProcedure
       const classLevel = classLevels?.[(index??0)] ?? 1;
 
       character.spellSlots = ((sc?.class.spellSlots as unknown as number[][])[classLevel - 1]??[]);
-      console.log(`\n\nSpell Slots: ${((sc?.class.spellSlots as unknown as number[][])[classLevel - 1]??[])}\n\n`);
+      // console.log(`\n\nSpell Slots: ${((sc?.class.spellSlots as unknown as number[][])[classLevel - 1]??[])}\n\n`);
       character.spellsPreparedNum = sc?.class.spellsPrepared?.[classLevel - 1] ?? 0;
       character.knownCantripsNum = sc?.class.knownCantripsNum?.[classLevel - 1] ?? 0;
 

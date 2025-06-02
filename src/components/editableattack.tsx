@@ -1,5 +1,6 @@
 import { Ability, type Attack } from "@prisma/client";
 import { useState } from "react";
+import { triggerCustomDiceRoll, triggerAbilityCheck } from "./diceroller";
 
 type DamageDice = {
   num: number;
@@ -25,9 +26,9 @@ export const EditableAttack = ({ attack, onSave }: EditableAttackProps) => {
   };
 
   return (
-    <div className="border p-4 rounded-md space-y-2">
+    <div className="w-[260px] space-y-2 flex flex-wrap">
       <input
-        className="input w-full"
+        className="flex flex-col w-full px-3 py-1.5 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         type="text"
         value={editable.name}
         onChange={(e) => handleChange("name", e.target.value)}
@@ -35,46 +36,62 @@ export const EditableAttack = ({ attack, onSave }: EditableAttackProps) => {
       />
 
       <input
-        className="input w-full"
+        className="w-[200px] px-3 py-1.5 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         type="number"
         value={editable.toHitBonus}
         onChange={(e) => handleChange("toHitBonus", Number(e.target.value))}
         placeholder="To Hit Bonus"
       />
+      <button className="ml-2 px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700" onClick={() => 
+            triggerAbilityCheck(editable.toHitBonus)
+          }>
+      🎲
+      </button>
 
       <textarea
-        className="textarea w-full"
+        className="w-full px-3 py-1.5 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
         value={editable.notes}
         onChange={(e) => handleChange("notes", e.target.value)}
         placeholder="Notes"
       />
 
-      <div className="flex gap-2">
-        <input
-          type="number"
-          className="input"
-          value={(editable.damageDice as DamageDice).num}
-          onChange={(e) => handleDiceChange("num", Number(e.target.value))}
-        />
-        <span>d</span>
-        <input
-          type="number"
-          className="input"
-          value={(editable.damageDice as DamageDice).faces}
-          onChange={(e) => handleDiceChange("faces", Number(e.target.value))}
-        />
-      </div>
+<div className="flex items-center gap-2">
+  <input
+    type="number"
+    className="input w-16 px-2 py-1 border rounded-md"
+    value={(editable.damageDice as DamageDice).num}
+    onChange={(e) => handleDiceChange("num", Number(e.target.value))}
+  />
+  <span className="text-gray-600">d</span>
+  <input
+    type="number"
+    className="input w-16 px-2 py-1 border rounded-md"
+    value={(editable.damageDice as DamageDice).faces}
+    onChange={(e) => handleDiceChange("faces", Number(e.target.value))}
+  />
+  <button
+    className="ml-2 px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
+    onClick={() =>
+      triggerCustomDiceRoll(
+        (editable.damageDice as DamageDice).num,
+        (editable.damageDice as DamageDice).faces
+      )
+    }
+  >
+    🎲
+  </button>
+</div>
 
       <input
         type="text"
-        className="input w-full"
+        className="input"
         value={editable.damageTypes}
         onChange={(e) => handleChange("damageTypes", e.target.value)}
         placeholder="Damage Types"
       />
 
       <select
-        className="select w-full"
+        className="select w-full bg-[#171a4d]"
         value={editable.ability}
         onChange={(e) => handleChange("ability", e.target.value as Ability)}
       >
@@ -105,7 +122,7 @@ export const EditableAttack = ({ attack, onSave }: EditableAttackProps) => {
       />
 
       <button
-        className="btn mt-2"
+        className="btn w-[100px] py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer"
         onClick={() => onSave(editable)}
       >
         Save
