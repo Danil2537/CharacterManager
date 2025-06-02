@@ -527,11 +527,11 @@ export const interactiveSheetRouter = createTRPCRouter({
           });
         }),
 
-      updateArmor: publicProcedure
-      .input(z.object({charId: z.number(), newAC: z.number()}))
-      .mutation(async ({ctx,input})=> {
-        return await ctx.prisma.character.update({where: {id: input.charId}, data: {armorClass: (input?.newAC??10)}});
-      }),
+      // updateArmor: publicProcedure
+      // .input(z.object({charId: z.number(), newAC: z.number()}))
+      // .mutation(async ({ctx,input})=> {
+      //   return await ctx.prisma.character.update({where: {id: input.charId}, data: {armorClass: (input?.newAC??10)}});
+      // }),
 
       getAllClasses: publicProcedure.query(async ({ ctx }) => {
         const classes = await ctx.prisma.class.findMany({ include: { feats: true, startingEquipment: true } });
@@ -811,5 +811,17 @@ levelUp: publicProcedure
         currentHitPoints: input.curHP,
         maxHitPoints: input.maxHP,
       }});
+    }),
+
+    updateCharData: publicProcedure
+    .input(z.object({charId: z.number(), armor: z.number(), speed: z.number(), initiative: z.number(), exhaustion: z.number(), profBonus: z.number()}))
+    .mutation(async ({ctx,input})=> {
+      return await ctx.prisma.character.update({where: {id: input.charId}, data: {
+        armorClass: input.armor,
+        speed: input.speed,
+        initiative: input.initiative,
+        exhaustionLevel: input.exhaustion,
+        proficiencyBonus: input.profBonus,
+      }})
     }),
 });

@@ -165,6 +165,7 @@ export default function InteractiveSheet()
     }, [character?.hitDice]);
     const { mutateAsync: shortRest } = api.interactiveSheet.shortRest.useMutation();
     const { mutateAsync: longRest } = api.interactiveSheet.longRest.useMutation();
+    const {mutateAsync: updateCharData} = api.interactiveSheet.updateCharData.useMutation();
 
     const handleShortRest = async () => {
         if (!character?.id) return;
@@ -197,6 +198,18 @@ export default function InteractiveSheet()
       if (!character?.id) return;
       await longRest({charId: character.id});
     };
+
+    const [charData, setCharData] = useState<Array<number>>(([(character?.armorClass??10), (character?.initiative??0), (character?.speed??30), (character?.exhaustionLevel??0), (character?.proficiencyBonus??2)]));
+    useEffect(()=> {
+      if(character) {
+        setCharData(([(character?.armorClass??10), (character?.initiative??0), (character?.speed??30), (character?.exhaustionLevel??0), (character?.proficiencyBonus??2)]));
+      }
+    }, [character]);
+
+    const handleUpdateChardata = async (chardata: any[]) => {
+      if(!character?.id) return;
+      await updateCharData({charId: character.id, armor: chardata[0],  initiative: chardata[1], speed: chardata[2],exhaustion: chardata[3], profBonus: chardata[4]});
+    }
 
     const modifier = (score: number) => {
       return Math.floor((score-10)/2);
@@ -254,11 +267,83 @@ export default function InteractiveSheet()
         />
       </div>
       <button className="text-lg" onClick={()=>handleUpdateHP((curHP??10), (maxHP??0))}>Update HP</button>
-      <h3>AC: {character.armorClass}</h3>
-      <h3>Initiative: {character.initiative}</h3>
-      <h3>Speed: {character.speed}</h3>
-      <h3>Exhaustion: {character.exhaustionLevel}</h3>
-      <h3>Proficiency Bonus: {character.proficiencyBonus}</h3>
+      <div className="flex items-center gap-2">
+        <label className="text-lg">Armor Class:</label>
+        <input
+          type="number"
+          className="w-20 px-2 py-1 rounded bg-gray-700 text-white border border-gray-600"
+          value={charData[0]}
+          onChange={(e) => {
+            const newData = [...charData]; 
+            newData[0] = Number(e.target.value); 
+            setCharData(newData); 
+          }}
+        />
+      </div>
+
+      <div className="flex items-center gap-2">
+        <label className="text-lg">Initiative:</label>
+        <input
+          type="number"
+          className="w-20 px-2 py-1 rounded bg-gray-700 text-white border border-gray-600"
+          value={charData[1]}
+          onChange={(e) => {
+            const newData = [...charData]; 
+            newData[1] = Number(e.target.value); 
+            setCharData(newData); 
+          }}
+        />
+      </div>
+
+      <div className="flex items-center gap-2">
+        <label className="text-lg">Speed:</label>
+        <input
+          type="number"
+          className="w-20 px-2 py-1 rounded bg-gray-700 text-white border border-gray-600"
+          value={charData[2]}
+          onChange={(e) => {
+            const newData = [...charData]; 
+            newData[2] = Number(e.target.value); 
+            setCharData(newData); 
+          }}
+        />
+      </div>
+
+      <div className="flex items-center gap-2">
+        <label className="text-lg">Exhaustion:</label>
+        <input
+          type="number"
+          className="w-20 px-2 py-1 rounded bg-gray-700 text-white border border-gray-600"
+          value={charData[3]}
+          onChange={(e) => {
+            const newData = [...charData]; 
+            newData[3] = Number(e.target.value); 
+            setCharData(newData); 
+          }}
+        />
+      </div>
+
+      <div className="flex items-center gap-2">
+        <label className="text-lg">Prof. Bonus:</label>
+        <input
+          type="number"
+          className="w-20 px-2 py-1 rounded bg-gray-700 text-white border border-gray-600"
+          value={charData[4]}
+          onChange={(e) => {
+            const newData = [...charData]; 
+            newData[4] = Number(e.target.value); 
+            setCharData(newData); 
+          }}
+        />
+      </div>
+
+      <button
+        className="text-lg px-3 py-1 bg-blue-600 rounded hover:bg-blue-700"
+        onClick={() =>
+          handleUpdateChardata(charData)}
+      >
+        Update Character Data
+      </button>
   </div>
 
   <div className="flex flex-1 overflow-hidden">  
