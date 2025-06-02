@@ -214,7 +214,7 @@ const [openSpeciesDescription, setOpenSpeciesDescription] = useState<number | nu
           </nav>
         </header>
         <div className="flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h2 className="text-2xl font-bold text-white border border-gray-700 rounded px-5 py-5 bg-[#121222]">Створення персонажа (Шаг {step + 1})</h2>
+          <h2 className="text-2xl font-bold text-white border border-gray-700 rounded px-5 py-5 bg-[#121222]">Створення персонажа (Крок {step + 1})</h2>
 
           {step === 0 && (
           <div className="block px-[30px] py-[30px] border border-gray-700 rounded w-[1000px] bg-[#121222]">

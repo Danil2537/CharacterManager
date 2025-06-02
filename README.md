@@ -17,3 +17,5 @@ TODO: [done] check domain spells
 TODO: [done] check why classLevels are bigger than level
 TODO: [done] remove alignment
 TODO: [done] add/delete attacks
+TODO: check knownCantrips for imported char. Seems to be lost somewhere.
+TODO: fix clones (see db)

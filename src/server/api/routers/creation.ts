@@ -184,22 +184,22 @@ export const creationRouter = createTRPCRouter({
           exhaustionLevel: 0,
           maxHitPoints: chosenClass.hitDiceType + conMod,
           currentHitPoints: chosenClass.hitDiceType + conMod,
-          hitDice: { num: 1, faces: chosenClass.hitDiceType },
+          hitDice: [{ num: 1, faces: chosenClass.hitDiceType }],
           experience: 0,
           level: 1,
           passivePerception: 10 + wisMod,
           carryingCapacity: carryingCapacity,
           // alignment: Alignment.LawfulGood,
-          classLevels: [1],
+          //classLevels: [1],
           spellAbility,
           spellSlots,
           currentSpellSlots,
           spellSaveDC,
           spellsPreparedNum,
           knownCantripsNum,
-          characterClasses: {
-            connect: {id: chosenClass.id}
-          },
+          // characterClasses: {
+          //   connect: {id: chosenClass.id}
+          // },
           characterItems: {
             connect: chosenEquipment.map((item) => ({ id: item.id })),
           },
@@ -236,12 +236,13 @@ export const creationRouter = createTRPCRouter({
           }));
       
 
-      // await ctx.prisma.characterClasses.create({
-      //   data: {
-      //     characterId: character.id,
-      //     classId: chosenClass.id,
-      //   },
-      // });
+      await ctx.prisma.characterClasses.create({
+        data: {
+          characterId: character.id,
+          classId: chosenClass.id,
+          classLevels: 1,
+        },
+      });
 
       // if (chosenEquipment.length > 0) {
       //   await ctx.prisma.characterItems.createMany({

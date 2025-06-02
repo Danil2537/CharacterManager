@@ -229,10 +229,12 @@ model Character {
     //By default CharacterClasses would only be the main class, 
     //but when multiclassing, this array will contain every leveled class
     //characterClasses CharacterClasses[]
-    characterClasses Class[]
+    //characterClasses Class[]
     //classLevels will contain how many levels in each class character has. 
     //The sum of this array should go into Level field
-    classLevels Int[] @default([1])
+
+    //classLevels Int[] @default([1])
+
     // //When reaching level 3 for a class (which can happen several times if multiclassed)
     // //player chooses one of available subclasses for the class;
     // //subclasses grant unique features, on certain levels
@@ -259,6 +261,8 @@ model Character {
     spellsKnown Spell[] @relation(name: "spellsKnown") //for bards and sorcerers and such, this is spells learned on lvl-ups. For clerics and such, this contains full spell list of their class (and above spellsKnownNum therefore = class spell List size)
     spellsPrepared Spell[] @relation(name: "spellsPrepared")//this is a sub-array of spellsKnown
     //TODO: add cosmetic fields, such as biography, appearance etc
+
+    characterClasses CharacterClasses[]
 }
 
 model Attack {
@@ -286,31 +290,6 @@ model CharacterWeaponProficiency {
     @@unique([characterId, weaponId, property]) // Prevent duplicate proficiencies
 }
 
-model Class {
-    id Int @id @default(autoincrement())
-    //characters CharacterClasses[]
-    characters Character[]
-    feats Feat[]
-    name String @default("Unknown")
-    description String 
-    primaryAbility Ability 
-    spellAbility Ability @default(Intelligence)
-    hitDiceType Int 
-    saveProfs Ability[] //always two abilities
-    skillProfsNum Int //how many skill proficiencies this class grants
-    availableSkillProfs Skill[]//player can choose skillProfsNum number of skills from this list. Each class has different list 
-    weaponProfs WeaponProperty[] 
-    armorTraining Armor[] 
-    multiclassRequirement String //example: to multiclass into a wizard, you need at least 13 intelligence (wizard's primary ability) score
-    startingEquipment Item[] //player can choose to take or not each individual item in this list. Should make checkbox in ui
-    startingGold Int 
-    //subclasses Subclass[]
-    grantsSpellcasting Boolean
-    spellcastingType SpellcastingType?
-    spellcastingLevel Int @default(0) //0 for non-mages, 1 for fighter/rouge mages, 2 for palading/rangers and other half-casters, 3 for full-casters 
-    spellsList Spell[] 
-    //grantedSpells GrantedSpell[] @relation("ClassGrants")
-    knownCantripsNum Int[] //how many cantrips character "knows". Cantrips are lvl0 spells, that don't require spell slots to use
     //example spell slots for cleric: spellSlots: 
     // [[2,0,0,0,0,0,0,0,0],
     // [3,0,0,0,0,0,0,0,0],
@@ -332,18 +311,48 @@ model Class {
     // [4,3,3,3,3,1,1,1,1],
     // [4,3,3,3,3,2,1,1,1],
     // [4,3,3,3,3,2,2,1,1]]
+model Class {
+    id Int @id @default(autoincrement())
+    //characters CharacterClasses[]
+    //characters Character[]
+    feats Feat[]
+    name String @default("Unknown")
+    description String 
+    primaryAbility Ability 
+    spellAbility Ability @default(Intelligence)
+    hitDiceType Int 
+    saveProfs Ability[] //always two abilities
+    skillProfsNum Int //how many skill proficiencies this class grants
+    availableSkillProfs Skill[]//player can choose skillProfsNum number of skills from this list. Each class has different list 
+    weaponProfs WeaponProperty[] 
+    armorTraining Armor[] 
+    multiclassRequirement String //example: to multiclass into a wizard, you need at least 13 intelligence (wizard's primary ability) score
+    startingEquipment Item[] //player can choose to take or not each individual item in this list. Should make checkbox in ui
+    startingGold Int 
+    //subclasses Subclass[]
+    grantsSpellcasting Boolean
+    spellcastingType SpellcastingType?
+    spellcastingLevel Int @default(0) //0 for non-mages, 1 for fighter/rouge mages, 2 for palading/rangers and other half-casters, 3 for full-casters 
+    spellsList Spell[] 
+    //grantedSpells GrantedSpell[] @relation("ClassGrants")
+    knownCantripsNum Int[] //how many cantrips character "knows". Cantrips are lvl0 spells, that don't require spell slots to use
+
     spellSlots Json? 
     spellsPrepared Int[]
     grantedSpells GrantedSpell[]
+
+    CharacterClasses CharacterClasses[]
 }
 
-// model CharacterClasses {
-//     @@id([characterId, classId])
-//     character Character @relation(fields: [characterId], references:[id])
-//     characterId Int
-//     class Class @relation(fields: [classId], references: [id])
-//     classId Int 
-// }
+
+model CharacterClasses {
+  @@id([characterId, classId])
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  characterId Int
+  class       Class     @relation(fields: [classId], references: [id])
+  classId     Int
+  classLevels Int
+}
 
 model Species {
     //technically, some species have "sub species", like dragonborn having "Draconic Ancestors";

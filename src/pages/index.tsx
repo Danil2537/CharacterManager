@@ -32,16 +32,17 @@ export default function Home() {
   });
 
   const exportCharacter = api.profile.exportCharacter.useMutation({
-    onSuccess: (data: { id: any; }) => {
-      const blob = new Blob([JSON.stringify(data, null, 2)], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `character-${data.id}.json`;
-      a.click();
-    },
+    onSuccess: (data) => {
+    const character = data as unknown as { id: number };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `character-${character.id}.json`;
+    a.click();
+  }
   });
 
   const importCharacter = api.profile.importCharacter.useMutation({
@@ -160,6 +161,13 @@ export default function Home() {
               >
                 Import
               </button>
+              <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/json"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
               </h2>
               {isLoading && <p>Loading characters...</p>}
               {isError && <p>Failed to load characters.</p>}
@@ -178,7 +186,7 @@ export default function Home() {
                         Background: {character.background?.name ?? "Unknown"} <br />
                         Classes:{" "}
                         {character.characterClasses
-                          ?.map((cc) => cc?.name ?? "Unknown")
+                          ?.map((cc) => cc?.class.name ?? "Unknown")
                           .join(", ") ?? "None"}
                       </div>
                       <div className="text-green-400 text-sm">💚{character.currentHitPoints} / {character.maxHitPoints} HP</div>

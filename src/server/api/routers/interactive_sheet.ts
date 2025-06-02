@@ -64,7 +64,7 @@ export const interactiveSheetRouter = createTRPCRouter({
         species: true,
         background: true,
         //subclass: true,
-        characterClasses: true,
+        characterClasses: {include: {class: true}},
         characterItems: true,
         weaponProficiencies: {
           include: { weapon: true },
@@ -75,6 +75,8 @@ export const interactiveSheetRouter = createTRPCRouter({
         spellsPrepared: true,
       },
     });
+    char?.characterClasses?.forEach((charcls)=>console.log(`\n\n\nCharacter CLasses: ${charcls.class.name}\n\n\n`));
+    //char?.characterClasses.sort((a, b) => a.id - b.id);
     return char;
     }),
 
@@ -156,10 +158,7 @@ export const interactiveSheetRouter = createTRPCRouter({
         const char = await ctx.prisma.character.findFirst({
           where: { id: input.charId },
           include: {
-            characterClasses: {
-              include: {
-                spellsList: true,
-              },
+            characterClasses: { include: {class: {include: { spellsList: true,}}},
             },
             spellsKnown: true,
           },
@@ -174,14 +173,14 @@ export const interactiveSheetRouter = createTRPCRouter({
         const divineSpellIdsToConnect: number[] = [];
 
         for (const cls of char.characterClasses) {
-          for (const spell of cls.spellsList) {
+          for (const spell of cls.class.spellsList) {
             const shouldInclude =
               spell.level <= highestSpellLevel && !knownSpellIds.has(spell.id);
 
             if (shouldInclude) {
               availableSpells.push(spell);
 
-              if (cls.spellcastingType === SpellcastingType.Divine) {
+              if (cls.class.spellcastingType === SpellcastingType.Divine) {
                 char.spellsKnown.push(spell);
                 knownSpellIds.add(spell.id);
                 divineSpellIdsToConnect.push(spell.id);
@@ -217,10 +216,10 @@ export const interactiveSheetRouter = createTRPCRouter({
         const spell = await ctx.prisma.spell.findFirst({where: {id: input.spellId}});
         const char = await ctx.prisma.character.findFirst(
           {where: { id: input.charId }, 
-          include: {characterClasses: true, spellsPrepared: true, spellsKnown: true}
+          include: {characterClasses: { include: {class: {include: { spellsList: true,}}}}, spellsPrepared: true, spellsKnown: true}
         });
         if((spell?.level??0)>0) {
-          if(char?.characterClasses[0]?.spellcastingType==SpellcastingType.Innate)
+          if(char?.characterClasses[0]?.class.spellcastingType==SpellcastingType.Innate)
           {
             await ctx.prisma.character.update({
               where: { id: input.charId },
@@ -481,6 +480,7 @@ export const interactiveSheetRouter = createTRPCRouter({
         input.hitDice.forEach((hitDie)=> {
           heal += Math.floor(Math.random() * (hitDie.num*hitDie.faces - hitDie.num) + hitDie.num);
         });
+        console.log(`\n\n\nHEAL: ${heal}\n\n\n`);
         const character = await ctx.prisma.character.findUnique({
           where: { id: input.charId },
           select: {
@@ -539,199 +539,259 @@ export const interactiveSheetRouter = createTRPCRouter({
         return classes;
       }),
 
-    levelUp: publicProcedure
-      .input(z.object({ charId: z.number(), leveledClassId: z.number() }))
-      .mutation(async ({ ctx, input }) => {
-        const character = await ctx.prisma.character.findUnique({
-          where: { id: input.charId },
-          include: { characterClasses: {include: {feats: true, grantedSpells: {include: {Spell: true}}}}, 
-          feats: true, 
-          species: {include: {feats: true, grantedSpells: {include: {Spell: true}}}}, 
-          background: {include: {feats: true, grantedSpells: {include: {Spell: true}}}}, 
-          weaponProficiencies: true,
-          spellsKnown: true,
-          spellsPrepared: true,
-        }});
-        const leveledClass = await ctx.prisma.class.findUnique({
-          where: { id: input.leveledClassId },
-          include: { feats: true, grantedSpells: {include: {Spell: true}}},
-        });
-        if (!leveledClass) {throw new Error("Class not found");}
-        if (!character) throw new Error("Character not found");
-        if (!character.classLevels) {character.classLevels = [];}
-
-
-        const existingIndex = character.characterClasses.findIndex(cls => cls.id === leveledClass.id);
-        if (existingIndex === -1) {
-          character.characterClasses.push(leveledClass);
-          character.classLevels.push(1);
-          character.armorProfs = Array.from(new Set([...(character.armorProfs ?? []), ...leveledClass.armorTraining]));
-
-          const existingProperties = new Set(
-          character.weaponProficiencies
-            .filter((prof) => prof.property !== null)
-            .map((prof) => prof.property)
-          );
-          const newPropertiesToAdd = leveledClass.weaponProfs.filter(
-            (prop) => !existingProperties.has(prop)
-          );
-          await ctx.prisma.characterWeaponProficiency.createMany({
-            data: newPropertiesToAdd.map((property) => ({
-              characterId: character.id,
-              property,
-            })),
-            skipDuplicates: true,
-          });
-        } 
-        else {
-          character.classLevels[existingIndex] = (character.classLevels[existingIndex] ?? 0) + 1;
-        }
-
-
-        const index = character.characterClasses.findIndex((cls) => cls.id === input.leveledClassId);
-        type HitDie = { num: number; faces: number };
-        //character.classLevels = [...character.classLevels];
-        const updatedHitDice = Array.isArray(character.hitDice) ? [...(character.hitDice as HitDie[])] : [];
-        character.maxHitPoints = (character?.maxHitPoints??0)+Math.floor(Math.random() * (leveledClass?.hitDiceType - 1) + 1)+(character?.abilityScores[2]??0);
-        if (index !== -1) {
-          //if(character.classLevels[index]){character.classLevels[index]++;}
-
-          if (updatedHitDice[index]) {
-            updatedHitDice[index].num++;
-          } 
-          else {
-            updatedHitDice[index] = {
-              num: 1,
-              faces: leveledClass.hitDiceType ?? 6,
-            };
-          }
-        } 
-        else {
-          character.classLevels.push(1);
-          updatedHitDice.push({
-            num: 1,
-            faces: leveledClass.hitDiceType ?? 6,
-          });
-        }
-        character.hitDice = updatedHitDice;
-        //character.level = character.classLevels.reduce((sum, lvl) => sum + lvl, 0);
-        character.level+=1;
-        const levelMatches = (feat: { gainedAtLevel: number | null }) =>
-          (feat.gainedAtLevel ?? 1) === character.level;
-
-        const newSpeciesFeats = character?.species?.feats?.filter(levelMatches) ?? [];
-        const newBackgroundFeats = character?.background?.feats?.filter(levelMatches) ?? [];
-        const newClassFeats = character?.characterClasses
-          .flatMap(cls => cls?.feats ?? [])
-          .filter(levelMatches);
-
-        character.feats = [...(character?.feats ?? []), ...newSpeciesFeats, ...newBackgroundFeats, ...newClassFeats];
-        const getProfBonus = (level:number) => {
-          if(level<5) {return 2;}
-          else if(level<9) {return 3;}
-          else if(level<13) {return 4;}
-          else if(level<17) {return 5;}
-          else if(level<=20) {return 6;}
-        };
-        character.proficiencyBonus = (getProfBonus(character.level)??2);
-
-
-        const spellcastingClasses = character.characterClasses
-          .map((cls, index) => ({ cls, index }))
-          .filter(({ cls }) => cls.grantsSpellcasting);
-        if(spellcastingClasses.length>1) {
-          const spellLevel = calculateMultiClassSpellSlotLevel(character?.characterClasses, character?.classLevels);
-          character.spellSlots = (multiclassSpellSlots[spellLevel-1]??[]);
-
-          character.spellsPreparedNum = spellcastingClasses.reduce((sum, { cls, index }) => {
-          const classLevel = character.classLevels?.[index] ?? 0;
-          const preparedArray = cls.spellsPrepared ?? [];
-          const preparedAtLevel = preparedArray[classLevel - 1] ?? 0;
-          return sum + preparedAtLevel;
-        }, 0);
-
-         character.knownCantripsNum = spellcastingClasses.reduce((sum, { cls, index }) => {
-          const classLevel = character.classLevels?.[index] ?? 0;
-          const cantripsArray = cls.knownCantripsNum ?? [];
-          const cantripsAtLevel = cantripsArray[classLevel - 1] ?? 0;
-          return sum + cantripsAtLevel;
-        }, 0);
-
-          const spellAbilityIndex = abilityIndexMap[spellcastingClasses.at(0)?.cls.spellAbility??Ability.Intelligence];
-          const spellScore = character.abilityScores[spellAbilityIndex];
-          character.spellSaveDC =  8 + Math.floor(((spellScore??12) - 10) / 2) + (character.proficiencyBonus??2);
-          character.spellAbility = (spellcastingClasses?.at(0)?.cls.spellAbility??Ability.Intelligence);
-        }
-        else if(spellcastingClasses.length==1) {
-          const spellcastingClass = character?.characterClasses.find(cls=> cls.grantsSpellcasting==true);
-          const index = character.characterClasses.findIndex((cls) => cls.id === spellcastingClass?.id);
-          const classLevel = character.classLevels?.[index];
-          if (spellcastingClass?.spellSlots && Array.isArray(spellcastingClass.spellSlots) && typeof classLevel === 'number' && spellcastingClass.spellSlots.length >= classLevel) {
-              character.spellSlots = ((spellcastingClass.spellSlots as unknown as number[][])[classLevel - 1]??[]);
-          }
-          character.spellsPreparedNum = (spellcastingClass?.spellsPrepared[Number(classLevel)-1]??0);
-          character.knownCantripsNum = (spellcastingClass?.knownCantripsNum[Number(classLevel)-1]??0);
-          const spellAbilityIndex = abilityIndexMap[(spellcastingClass?.spellAbility??Ability.Intelligence)];
-          const spellScore = character.abilityScores[spellAbilityIndex];
-          character.spellSaveDC =  8 + Math.floor(((spellScore??12) - 10) / 2) + (character.proficiencyBonus??2);
-          character.spellAbility = (spellcastingClass?.spellAbility??Ability.Intelligence);
-        }
-
-        // Initialize or reuse spellsKnown
-        const knownSpells = new Map<number, typeof character.spellsKnown[number]>();
-        (character.spellsKnown ?? []).forEach(spell => {
-          knownSpells.set(spell.id, spell);
-        });
-
-        // Add granted spells from species and background if level matches
-        [character.species, character.background].forEach(source => {
-          source?.grantedSpells?.forEach(gs => {
-            if (gs.level === character.level && gs.Spell && !knownSpells.has(gs.Spell.id)) {
-              knownSpells.set(gs.Spell.id, gs.Spell);
-            }
-          });
-        });
-
-        // Add granted spells from class if class level matches
-        const classLevelIndex = character.characterClasses.findIndex(cls => cls.id === input.leveledClassId);
-        const classLevel = character.classLevels[classLevelIndex] ?? 0;
-        leveledClass.grantedSpells?.forEach(gs => {
-          if (gs.level === classLevel && gs.Spell && !knownSpells.has(gs.Spell.id)) {
-            knownSpells.set(gs.Spell.id, gs.Spell);
-          }
-        });
-
-        // Apply final list to character.spellsKnown
-        character.spellsKnown = Array.from(knownSpells.values());
-
-
-
-        character.hitDice = character.hitDice.filter((hd): hd is { num: number; faces: number } => hd !== undefined);
-        await ctx.prisma.character.update({
-          where: { id: input.charId },
-          data: {
-            classLevels: character.classLevels,
-            hitDice: character.hitDice,
-            maxHitPoints: character.maxHitPoints,
-            characterClasses: {
-              connect: index === -1 ? { id: input.leveledClassId } : undefined,
-            },
-            level: character.level,
-            feats: { set: character.feats.map(f => ({ id: f.id })),},
-            proficiencyBonus: character.proficiencyBonus,
-            spellSlots: character.spellSlots,
-            knownCantripsNum: character.knownCantripsNum,
-            spellsPreparedNum: character.spellsPreparedNum,
-            spellSaveDC: character.spellSaveDC,
-            currentSpellSlots: character.spellSlots,
-            spellsKnown: {
-              set: character.spellsKnown.map(spell => ({ id: spell.id })),
+levelUp: publicProcedure
+  .input(z.object({ charId: z.number(), leveledClassId: z.number() }))
+  .mutation(async ({ ctx, input }) => {
+    const character = await ctx.prisma.character.findUnique({
+      where: { id: input.charId },
+      include: {
+        characterClasses: {
+          include: {
+            class: {
+              include: {
+                spellsList: true,
+                grantedSpells: true,
+                feats: true,
+              },
             },
           },
-        });
-      }),
+        },
+        feats: true,
+        species: {
+          include: {
+            feats: true,
+            grantedSpells: { include: { Spell: true } },
+          },
+        },
+        background: {
+          include: {
+            feats: true,
+            grantedSpells: { include: { Spell: true } },
+          },
+        },
+        weaponProficiencies: true,
+        spellsKnown: true,
+        spellsPrepared: true,
+      },
+    });
 
-    updateAbiliityScores: publicProcedure
+    const leveledClass = await ctx.prisma.class.findUnique({
+      where: { id: input.leveledClassId },
+      include: {
+        feats: true,
+        grantedSpells: { include: { Spell: true } },
+      },
+    });
+
+    if (!character) throw new Error("Character not found");
+    if (!leveledClass) throw new Error("Class not found");
+
+    const classLevels: number[] = character.characterClasses.map(cc => cc.classLevels);
+    const existingIndex = character.characterClasses.findIndex(cls => cls.class.id === leveledClass.id);
+
+    if (existingIndex === -1) {
+      // First time leveling this class — create CharacterClasses entry
+      await ctx.prisma.characterClasses.create({
+        data: {
+          characterId: character.id,
+          classId: leveledClass.id,
+          classLevels: 1,
+        },
+      });
+
+      character.armorProfs = Array.from(
+        new Set([...(character.armorProfs ?? []), ...leveledClass.armorTraining])
+      );
+
+      const existingProperties = new Set(
+        character.weaponProficiencies
+          .filter((prof) => prof.property !== null)
+          .map((prof) => prof.property)
+      );
+      const newPropertiesToAdd = leveledClass.weaponProfs.filter(
+        (prop) => !existingProperties.has(prop)
+      );
+      await ctx.prisma.characterWeaponProficiency.createMany({
+        data: newPropertiesToAdd.map((property) => ({
+          characterId: character.id,
+          property,
+        })),
+        skipDuplicates: true,
+      });
+
+      classLevels.push(1);
+    } else {
+      // Already has the class — increment classLevels
+      const cc = character.characterClasses[existingIndex];
+      await ctx.prisma.characterClasses.update({
+        where: {
+          characterId_classId: {
+            characterId: character.id,
+            classId: leveledClass.id,
+          },
+        },
+        data: {
+          classLevels: (cc?.classLevels??0) + 1,
+        },
+      });
+      classLevels[existingIndex] = (cc?.classLevels??0) + 1;
+    }
+
+    // Hit Dice Update
+    type HitDie = { num: number; faces: number };
+    const updatedHitDice = Array.isArray(character.hitDice)
+      ? [...(character.hitDice as HitDie[])]
+      : [];
+
+    const classHitDie = leveledClass.hitDiceType ?? 6;
+    const conMod = Math.floor(((character?.abilityScores?.[2]??12)-10)/2) ?? 0;
+    const rolledHP = Math.floor(Math.random() * (classHitDie - 1) + 1);
+
+    character.maxHitPoints = (character.maxHitPoints ?? 0) + rolledHP + conMod;
+
+    if (existingIndex !== -1 && updatedHitDice[existingIndex]) {
+      updatedHitDice[existingIndex].num++;
+    } else {
+      updatedHitDice.push({ num: 1, faces: classHitDie });
+    }
+
+    character.hitDice = updatedHitDice.filter(Boolean);
+    character.level += 1;
+
+    const levelMatches = (feat: { gainedAtLevel: number | null }) =>
+      (feat.gainedAtLevel ?? 1) === character.level;
+
+    const newSpeciesFeats = character.species?.feats?.filter(levelMatches) ?? [];
+    const newBackgroundFeats = character.background?.feats?.filter(levelMatches) ?? [];
+    // const newClassFeats = character.characterClasses
+    //   .flatMap((cls) => cls.class.feats ?? [])
+    //   .filter(levelMatches);
+
+    const newClassLevel = classLevels[character.characterClasses.findIndex(cls => cls.class.id === leveledClass.id)] ?? 1;
+
+    // Feats from leveledClass matching new level
+    const newLeveledClassFeats = (leveledClass.feats ?? []).filter(
+      (feat) => (feat.gainedAtLevel ?? 1) === newClassLevel
+    );
+
+    // All other feats matching character level
+    const newClassFeats = character.characterClasses
+      .flatMap((cls) => cls.class.feats ?? [])
+      .filter((feat) => (feat.gainedAtLevel ?? 1) === character.level);
+
+      newClassFeats.forEach((feat)=>console.log(`\n\nNEW FEAT: ${feat.name}\n\n`));
+    character.feats = [
+      ...(character.feats ?? []),
+      ...newSpeciesFeats,
+      ...newBackgroundFeats,
+      ...newClassFeats,
+      ...newLeveledClassFeats,
+    ];
+    //character.feats = [...(character.feats ?? []), ...newSpeciesFeats, ...newBackgroundFeats, ...newClassFeats];
+
+    const getProfBonus = (level: number) => {
+      if (level < 5) return 2;
+      else if (level < 9) return 3;
+      else if (level < 13) return 4;
+      else if (level < 17) return 5;
+      else return 6;
+    };
+
+    character.proficiencyBonus = getProfBonus(character.level);
+
+    const spellcastingClasses = character.characterClasses
+      .map((cls, index) => ({ cls, index }))
+      .filter(({ cls }) => cls.class.grantsSpellcasting);
+
+    if (spellcastingClasses.length > 1) {
+      const spellLevel = calculateMultiClassSpellSlotLevel(
+        character.characterClasses.map((cc) => cc.class),
+        classLevels
+      );
+      character.spellSlots = multiclassSpellSlots[spellLevel - 1] ?? [];
+
+      character.spellsPreparedNum = spellcastingClasses.reduce((sum, { cls, index }) => {
+        const classLevel = classLevels?.[index] ?? 0;
+        return sum + (cls.class.spellsPrepared?.[classLevel - 1] ?? 0);
+      }, 0);
+
+      character.knownCantripsNum = spellcastingClasses.reduce((sum, { cls, index }) => {
+        const classLevel = classLevels?.[index] ?? 0;
+        return sum + (cls.class.knownCantripsNum?.[classLevel - 1] ?? 0);
+      }, 0);
+
+      const spellClass = spellcastingClasses[0]?.cls.class;
+      const spellAbilityIndex = abilityIndexMap[spellClass?.spellAbility ?? Ability.Intelligence];
+      const spellScore = character.abilityScores[spellAbilityIndex];
+      character.spellSaveDC =
+        8 + Math.floor(((spellScore ?? 12) - 10) / 2) + (character.proficiencyBonus ?? 2);
+      character.spellAbility = spellClass?.spellAbility ?? Ability.Intelligence;
+    } else if (spellcastingClasses.length === 1) {
+      const sc = spellcastingClasses[0]?.cls;
+      const index = spellcastingClasses[0]?.index;
+      const classLevel = classLevels?.[(index??0)] ?? 1;
+
+      character.spellSlots = ((sc?.class.spellSlots as unknown as number[][])[classLevel - 1]??[]);
+      character.spellsPreparedNum = sc?.class.spellsPrepared?.[classLevel - 1] ?? 0;
+      character.knownCantripsNum = sc?.class.knownCantripsNum?.[classLevel - 1] ?? 0;
+
+      const spellAbilityIndex = abilityIndexMap[sc?.class.spellAbility ?? Ability.Intelligence];
+      const spellScore = character.abilityScores[spellAbilityIndex];
+      character.spellSaveDC =
+        8 + Math.floor(((spellScore ?? 12) - 10) / 2) + (character.proficiencyBonus ?? 2);
+      character.spellAbility = sc?.class.spellAbility ?? Ability.Intelligence;
+    }
+
+    const knownSpells = new Map<number, typeof character.spellsKnown[number]>();
+    (character.spellsKnown ?? []).forEach((spell) => {
+      knownSpells.set(spell.id, spell);
+    });
+
+    [character.species, character.background].forEach((source) => {
+      source?.grantedSpells?.forEach((gs) => {
+        if (gs.level === character.level && gs.Spell && !knownSpells.has(gs.Spell.id)) {
+          knownSpells.set(gs.Spell.id, gs.Spell);
+        }
+      });
+    });
+
+    const classLevelIndex = character.characterClasses.findIndex(
+      (cls) => cls.class.id === input.leveledClassId
+    );
+    const classLevel = classLevels[classLevelIndex] ?? 0;
+    leveledClass.grantedSpells?.forEach((gs) => {
+      if (gs.level === classLevel && gs.Spell && !knownSpells.has(gs.Spell.id)) {
+        knownSpells.set(gs.Spell.id, gs.Spell);
+      }
+    });
+
+    character.spellsKnown = Array.from(knownSpells.values());
+
+    await ctx.prisma.character.update({
+      where: { id: input.charId },
+      data: {
+        hitDice: character.hitDice,
+        currentHitPoints: character.maxHitPoints,
+        maxHitPoints: character.maxHitPoints,
+        level: character.level,
+        feats: {
+          set: character.feats.map((f) => ({ id: f.id })),
+        },
+        proficiencyBonus: character.proficiencyBonus,
+        spellSlots: character.spellSlots,
+        currentSpellSlots: character.spellSlots,
+        knownCantripsNum: character.knownCantripsNum,
+        spellsPreparedNum: character.spellsPreparedNum,
+        spellSaveDC: character.spellSaveDC,
+        spellsKnown: {
+          set: character.spellsKnown.map((spell) => ({ id: spell.id })),
+        },
+      },
+    });
+  }),
+
+
+    updateAbilityScores: publicProcedure
     .input(z.object({charId: z.number(), newScores: z.array(z.number())}))
     .mutation(async ({ctx,input})=> {
       return await ctx.prisma.character.update({where: {id: input.charId}, data: {abilityScores: input.newScores}});
@@ -741,5 +801,15 @@ export const interactiveSheetRouter = createTRPCRouter({
     .input(z.object({attackId: z.number()}))
     .mutation(async ({ctx,input})=> {
       return await ctx.prisma.attack.delete({where: {id: input.attackId}});
+    }),
+
+    updateHitPoints: publicProcedure
+    .input(z.object({charId: z.number(), curHP: z.number(), maxHP: z.number()}))
+    .mutation(async ({ctx,input})=>{
+      console.log(`\n\n\nNew HP for char ${input.charId}: Cur: ${input.curHP}, Max: ${input.maxHP}\n\n\n`);
+      return await ctx.prisma.character.update({where: {id: input.charId}, data: {
+        currentHitPoints: input.curHP,
+        maxHitPoints: input.maxHP,
+      }});
     }),
 });

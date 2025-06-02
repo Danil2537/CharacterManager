@@ -22,11 +22,11 @@ export const profileRouter = createTRPCRouter({
                     species: true,
                     background: true,
                     //subclass: true,
-                    characterClasses: true,
+                    characterClasses: {include: {class: true}},
                 }
             }) ?? [];
 
-            console.log("Fetched characters with full details:", JSON.stringify(characters, null, 2));
+            //console.log("Fetched characters with full details:", JSON.stringify(characters, null, 2));
 
             return characters;
         } else {
@@ -35,7 +35,6 @@ export const profileRouter = createTRPCRouter({
             );
         }
     }),
-
 cloneCharacter: publicProcedure
   .input(z.object({ charId: z.number() }))
   .mutation(async ({ ctx, input }) => {
@@ -44,8 +43,7 @@ cloneCharacter: publicProcedure
       include: {
         species: true,
         background: true,
-        //subclass: true,
-        characterClasses: true,
+        characterClasses: {include: {class:true}},
         characterItems: true,
         weaponProficiencies: {
           include: { weapon: true },
@@ -59,15 +57,7 @@ cloneCharacter: publicProcedure
 
     if (!orig) throw new Error("Original character not found");
 
-    let newHitDice = orig.hitDice;
-    if (!newHitDice && orig.classLevels && orig.characterClasses) {
-      newHitDice = orig.classLevels.map((num, i) => ({
-        num: num ?? 1,
-        faces: orig.characterClasses[i]?.hitDiceType ?? 6,
-      }));
-    }
-
-    const character = await ctx.prisma.character.create({
+    const newCharacter = await ctx.prisma.character.create({
       data: {
         name: orig.name + " (Clone)",
         clerkUserId: orig.clerkUserId,
@@ -93,45 +83,32 @@ cloneCharacter: publicProcedure
         exhaustionLevel: orig.exhaustionLevel,
         maxHitPoints: orig.maxHitPoints,
         currentHitPoints: orig.currentHitPoints,
-        hitDice: orig?.hitDice??orig.classLevels.map((num, i) => ({num: num ?? 1, faces: orig.characterClasses[i]?.hitDiceType ?? 6,})),
+        hitDice: orig.hitDice ?? [],
         experience: orig.experience,
         level: orig.level,
         passivePerception: orig.passivePerception ?? Math.floor(((orig.abilityScores[4] ?? 10) - 10) / 2) + 10,
         carryingCapacity: orig.carryingCapacity ?? 100,
-        // alignment: orig.alignment,
-        classLevels: orig.classLevels,
-         characterClasses: {
-          connect: orig.characterClasses.map((cls) => ({ id: cls.id })),
-        },
+        //classLevels: orig.classLevels,
         characterItems: {
           connect: orig.characterItems.map((item) => ({ id: item.id })),
         },
       },
     });
 
-    // if (orig.characterClasses) {
-    //   await ctx.prisma.characterClasses.createMany({
-    //     data: orig.characterClasses.map((cc) => ({
-    //       characterId: character.id,
-    //       classId: cc.class.id,
-    //     })),
-    //   });
-    // }
+    if (orig.characterClasses.length > 0) {
+      await ctx.prisma.characterClasses.createMany({
+        data: orig.characterClasses.map((cc) => ({
+          characterId: newCharacter.id,
+          classId: cc.classId,
+          classLevels: cc.classLevels,
+        })),
+      });
+    }
 
-    // if (orig.characterItems) {
-    //   await ctx.prisma.characterItems.createMany({
-    //     data: orig.characterItems.map((ci) => ({
-    //       characterId: character.id,
-    //       itemId: ci.item.id,
-    //     })),
-    //     skipDuplicates: true,
-    //   });
-    // }
-
-    if (orig.weaponProficiencies) {
+    if (orig.weaponProficiencies?.length > 0) {
       await ctx.prisma.characterWeaponProficiency.createMany({
         data: orig.weaponProficiencies.map((wp) => ({
-          characterId: character.id,
+          characterId: newCharacter.id,
           weaponId: wp.weaponId ?? null,
           property: wp.property ?? null,
         })),
@@ -139,9 +116,10 @@ cloneCharacter: publicProcedure
       });
     }
 
-    return character;
+    return newCharacter;
   }),
 
+  
 exportCharacter: publicProcedure
   .input(z.object({ charId: z.number() }))
   .mutation(async ({ ctx, input }) => {
@@ -151,7 +129,9 @@ exportCharacter: publicProcedure
         species: true,
         background: true,
         //subclass: true,
-        characterClasses: true,
+        characterClasses: {
+          include: { class: true },
+        },
         characterItems: true,
         weaponProficiencies: {
           include: { weapon: true },
@@ -206,25 +186,20 @@ importCharacter: publicProcedure
         level: orig?.level,
         passivePerception: orig?.passivePerception,
         carryingCapacity: orig?.carryingCapacity ?? 100,
-        // alignment: orig?.alignment,
-        classLevels: orig?.classLevels,
-        characterClasses: {
-          connect: orig.characterClasses.map((cls: Class) => ({ id: cls.id })),
-        },
-        characterItems: {
-          connect: orig.characterItems.map((item: Item) => ({ id: item.id })),
-        },
+        //alignment: orig?.alignment,
+        //classLevels: orig?.classLevels,
         },
     });
 
-    // if (orig.characterClasses) {
-    //     await ctx.prisma.characterClasses.createMany({
-    //     data: orig.characterClasses.map((cc: { class: { id: number; }; }) => ({
-    //         characterId: character.id,
-    //         classId: cc.class.id,
-    //     })),
-    //     });
-    // }
+    if (orig.characterClasses) {
+        await ctx.prisma.characterClasses.createMany({
+        data: orig.characterClasses.map((cc: { class: { id: any; }; classLevels: any; }) => ({
+            characterId: character.id,
+            classId: cc.class.id,
+            classLevels: cc.classLevels
+        })),
+        });
+    }
 
     // if (orig.characterItems) {
     //     await ctx.prisma.characterItems.createMany({
@@ -249,7 +224,6 @@ importCharacter: publicProcedure
 
     return character;
     }),
-
 
   deleteCharacter: publicProcedure.input(z.object({id: z.number()}))
    .mutation(async ({ ctx, input }) => {
