@@ -636,6 +636,10 @@ levelUp: publicProcedure
       });
       classLevels[existingIndex] = (cc?.classLevels??0) + 1;
     }
+    const characterClasses = await ctx.prisma.characterClasses.findMany({
+      where: { characterId: input.charId },
+      include: {class: {include: {spellsList: true, feats: true}},}
+    });
 
     // Hit Dice Update
     type HitDie = { num: number; faces: number };
@@ -667,7 +671,7 @@ levelUp: publicProcedure
     //   .flatMap((cls) => cls.class.feats ?? [])
     //   .filter(levelMatches);
 
-    const newClassLevel = classLevels[character.characterClasses.findIndex(cls => cls.class.id === leveledClass.id)] ?? 1;
+    const newClassLevel = classLevels[characterClasses.findIndex(cls => cls.class.id === leveledClass.id)] ?? 1;
 
     // Feats from leveledClass matching new level
     const newLeveledClassFeats = (leveledClass.feats ?? []).filter(
@@ -675,7 +679,7 @@ levelUp: publicProcedure
     );
 
     // All other feats matching character level
-    const newClassFeats = character.characterClasses
+    const newClassFeats = characterClasses
       .flatMap((cls) => cls.class.feats ?? [])
       .filter((feat) => (feat.gainedAtLevel ?? 1) === character.level);
 
@@ -699,13 +703,13 @@ levelUp: publicProcedure
 
     character.proficiencyBonus = getProfBonus(character.level);
 
-    const spellcastingClasses = character.characterClasses
+    const spellcastingClasses = characterClasses
       .map((cls, index) => ({ cls, index }))
       .filter(({ cls }) => cls.class.grantsSpellcasting);
 
     if (spellcastingClasses.length > 1) {
       const spellLevel = calculateMultiClassSpellSlotLevel(
-        character.characterClasses.map((cc) => cc.class),
+        characterClasses.map((cc) => cc.class),
         classLevels
       );
       character.spellSlots = multiclassSpellSlots[spellLevel - 1] ?? [];
@@ -732,6 +736,7 @@ levelUp: publicProcedure
       const classLevel = classLevels?.[(index??0)] ?? 1;
 
       character.spellSlots = ((sc?.class.spellSlots as unknown as number[][])[classLevel - 1]??[]);
+      console.log(`\n\nSpell Slots: ${((sc?.class.spellSlots as unknown as number[][])[classLevel - 1]??[])}\n\n`);
       character.spellsPreparedNum = sc?.class.spellsPrepared?.[classLevel - 1] ?? 0;
       character.knownCantripsNum = sc?.class.knownCantripsNum?.[classLevel - 1] ?? 0;
 
@@ -755,7 +760,7 @@ levelUp: publicProcedure
       });
     });
 
-    const classLevelIndex = character.characterClasses.findIndex(
+    const classLevelIndex = characterClasses.findIndex(
       (cls) => cls.class.id === input.leveledClassId
     );
     const classLevel = classLevels[classLevelIndex] ?? 0;
