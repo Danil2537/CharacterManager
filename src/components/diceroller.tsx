@@ -2,12 +2,10 @@ import { useEffect, useState } from "react";
 
 const diceTypes = [2, 4, 6, 8, 10, 12, 20, 100];
 
-// Внешний вызов ability check
 export const triggerAbilityCheck = (modifier: number) => {
   window.dispatchEvent(new CustomEvent("rollAbilityCheck", { detail: modifier }));
 };
 
-// Внешний вызов обычного броска (например: 2d10)
 export const triggerCustomDiceRoll = (num: number, faces: number) => {
   window.dispatchEvent(
     new CustomEvent("rollCustomDice", { detail: { num, faces } })
