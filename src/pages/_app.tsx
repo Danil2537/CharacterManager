@@ -1,6 +1,6 @@
 import { type AppType } from "next/app";
 import { Geist } from "next/font/google";
-
+import { DiceRoller } from "~/components/diceroller";
 import { api } from "../utils/api";
 import {
   ClerkProvider,
