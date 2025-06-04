@@ -35,89 +35,89 @@ export const profileRouter = createTRPCRouter({
             );
         }
     }),
-cloneCharacter: publicProcedure
-  .input(z.object({ charId: z.number() }))
-  .mutation(async ({ ctx, input }) => {
-    const orig = await ctx.prisma.character.findFirst({
-      where: { id: input.charId },
-      include: {
-        species: true,
-        background: true,
-        characterClasses: {include: {class:true}},
-        characterItems: true,
-        weaponProficiencies: {
-          include: { weapon: true },
-        },
-        feats: true,
-        attacks: true,
-        spellsKnown: true,
-        spellsPrepared: true,
-      },
-    });
+    cloneCharacter: publicProcedure
+    .input(z.object({ charId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+        const orig = await ctx.prisma.character.findFirst({
+          where: { id: input.charId },
+          include: {
+            species: true,
+            background: true,
+            characterClasses: {include: {class:true}},
+            characterItems: true,
+            weaponProficiencies: {
+              include: { weapon: true },
+            },
+            feats: true,
+            attacks: true,
+            spellsKnown: true,
+            spellsPrepared: true,
+          },
+        });
 
-    if (!orig) throw new Error("Original character not found");
+        if (!orig) throw new Error("Original character not found");
 
-    const newCharacter = await ctx.prisma.character.create({
-      data: {
-        name: orig.name + " (Clone)",
-        clerkUserId: orig.clerkUserId,
-        speciesID: orig.speciesID,
-        backgroundID: orig.backgroundID,
-        abilityScores: [
-          orig.abilityScores[0] ?? 10,
-          orig.abilityScores[1] ?? 10,
-          orig.abilityScores[2] ?? 10,
-          orig.abilityScores[3] ?? 10,
-          orig.abilityScores[4] ?? 10,
-          orig.abilityScores[5] ?? 10,
-        ],
-        savingThrows: orig.savingThrows,
-        armorProfs: orig.armorProfs,
-        skillProfs: orig.skillProfs,
-        skillExpertices: orig.skillExpertices ?? [],
-        knownLanguage: orig.knownLanguage,
-        initiative: orig.initiative,
-        speed: orig.speed,
-        proficiencyBonus: orig.proficiencyBonus,
-        armorClass: orig.armorClass,
-        exhaustionLevel: orig.exhaustionLevel,
-        maxHitPoints: orig.maxHitPoints,
-        currentHitPoints: orig.currentHitPoints,
-        hitDice: orig.hitDice ?? [],
-        experience: orig.experience,
-        level: orig.level,
-        passivePerception: orig.passivePerception ?? Math.floor(((orig.abilityScores[4] ?? 10) - 10) / 2) + 10,
-        carryingCapacity: orig.carryingCapacity ?? 100,
-        //classLevels: orig.classLevels,
-        characterItems: {
-          connect: orig.characterItems.map((item) => ({ id: item.id })),
-        },
-      },
-    });
+        const newCharacter = await ctx.prisma.character.create({
+          data: {
+            name: orig.name + " (Clone)",
+            clerkUserId: orig.clerkUserId,
+            speciesID: orig.speciesID,
+            backgroundID: orig.backgroundID,
+            abilityScores: [
+              orig.abilityScores[0] ?? 10,
+              orig.abilityScores[1] ?? 10,
+              orig.abilityScores[2] ?? 10,
+              orig.abilityScores[3] ?? 10,
+              orig.abilityScores[4] ?? 10,
+              orig.abilityScores[5] ?? 10,
+            ],
+            savingThrows: orig.savingThrows,
+            armorProfs: orig.armorProfs,
+            skillProfs: orig.skillProfs,
+            skillExpertices: orig.skillExpertices ?? [],
+            knownLanguage: orig.knownLanguage,
+            initiative: orig.initiative,
+            speed: orig.speed,
+            proficiencyBonus: orig.proficiencyBonus,
+            armorClass: orig.armorClass,
+            exhaustionLevel: orig.exhaustionLevel,
+            maxHitPoints: orig.maxHitPoints,
+            currentHitPoints: orig.currentHitPoints,
+            hitDice: orig.hitDice ?? [],
+            experience: orig.experience,
+            level: orig.level,
+            passivePerception: orig.passivePerception ?? Math.floor(((orig.abilityScores[4] ?? 10) - 10) / 2) + 10,
+            carryingCapacity: orig.carryingCapacity ?? 100,
+            //classLevels: orig.classLevels,
+            characterItems: {
+              connect: orig.characterItems.map((item) => ({ id: item.id })),
+            },
+          },
+        });
 
-    if (orig.characterClasses.length > 0) {
-      await ctx.prisma.characterClasses.createMany({
-        data: orig.characterClasses.map((cc) => ({
-          characterId: newCharacter.id,
-          classId: cc.classId,
-          classLevels: cc.classLevels,
-        })),
-      });
-    }
+        if (orig.characterClasses.length > 0) {
+          await ctx.prisma.characterClasses.createMany({
+            data: orig.characterClasses.map((cc) => ({
+              characterId: newCharacter.id,
+              classId: cc.classId,
+              classLevels: cc.classLevels,
+            })),
+          });
+        }
 
-    if (orig.weaponProficiencies?.length > 0) {
-      await ctx.prisma.characterWeaponProficiency.createMany({
-        data: orig.weaponProficiencies.map((wp) => ({
-          characterId: newCharacter.id,
-          weaponId: wp.weaponId ?? null,
-          property: wp.property ?? null,
-        })),
-        skipDuplicates: true,
-      });
-    }
+        if (orig.weaponProficiencies?.length > 0) {
+          await ctx.prisma.characterWeaponProficiency.createMany({
+            data: orig.weaponProficiencies.map((wp) => ({
+              characterId: newCharacter.id,
+              weaponId: wp.weaponId ?? null,
+              property: wp.property ?? null,
+            })),
+            skipDuplicates: true,
+          });
+        }
 
-    return newCharacter;
-  }),
+        return newCharacter;
+    }),
 
   
 exportCharacter: publicProcedure

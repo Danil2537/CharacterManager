@@ -57,7 +57,7 @@ export default function InteractiveSheet()
       }
     }
     
-    const { mutateAsync: addItem } = api.interactiveSheet.addItem.useMutation();
+    const {mutateAsync: addItem } = api.interactiveSheet.addItem.useMutation();
     const {mutateAsync: deleteItem} = api.interactiveSheet.deleteItem.useMutation();
     const {mutateAsync: updateAttacks} = api.interactiveSheet.updateAttacks.useMutation();
     const {mutateAsync: addAttack} = api.interactiveSheet.createAttack.useMutation();
